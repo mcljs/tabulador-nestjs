@@ -1,0 +1,18 @@
+image: node:18
+
+stages:
+  - deploy
+
+deploy_application:
+  stage: deploy
+  before_script:
+    - apt-get update && apt-get install -y rsync
+    - npm install
+    - npm run build
+  script:
+  - echo "Listando el contenido del directorio actual:"
+  - ls -la
+  - chmod +x ./deploy_script.sh
+  - ./deploy_script.sh
+  only: 
+    - main
