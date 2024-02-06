@@ -1,14 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Envio } from '../entities/envio.entity';
+import { EnvioEntity } from '../entities/envio.entity';
 import { CreateEnvioDto, UpdateEnvioDto } from '../dto/create-envio.dto';
+import { UsersEntity } from 'src/users/entities/users.entity';
+import { UsersService } from 'src/users/services/users.service';
 
 @Injectable()
 export class TabuladorService {
   constructor(
-    @InjectRepository(Envio)
-    private readonly envioRepository: Repository<Envio>,
+    @InjectRepository(EnvioEntity)
+    private readonly envioRepository: Repository<EnvioEntity>,
+    private readonly usersService: UsersService,
   ) {}
 
   private calcular_costo_envio(
@@ -38,7 +41,7 @@ export class TabuladorService {
     return distancia * costo_por_km + recargo * 2;
   }
 
-  async create(createEnvioDto: CreateEnvioDto): Promise<Envio> {
+  async create(createEnvioDto: CreateEnvioDto): Promise<EnvioEntity> {
     const costo_total = this.calcular_costo_envio(
       createEnvioDto.distancia,
       createEnvioDto.peso,
@@ -53,20 +56,26 @@ export class TabuladorService {
     return this.envioRepository.save(nuevoEnvio);
   }
 
-  async findAll(): Promise<Envio[]> {
-    return this.envioRepository.find({
+  async findAll(): Promise<EnvioEntity[]> {
+    const envios: EnvioEntity[] = await this.envioRepository.find({
       relations: ['user'],
     });
+    if (envios.length === 0) {
+      throw new NotFoundException('Not exits envios list');
+    }
+    return envios;
   }
 
-  async findOne(id: number): Promise<Envio> {
+  async findOne(id: number): Promise<EnvioEntity> {
     return this.envioRepository.findOne({
       where: { id },
-      relations: ['user'],
     });
   }
 
-  async update(id: number, updateEnvioDto: UpdateEnvioDto): Promise<Envio> {
+  async update(
+    id: number,
+    updateEnvioDto: UpdateEnvioDto,
+  ): Promise<EnvioEntity> {
     await this.envioRepository.update({ id }, updateEnvioDto);
     return this.envioRepository.findOne({
       where: { id },
@@ -76,7 +85,7 @@ export class TabuladorService {
     await this.envioRepository.delete(id);
   }
 
-  async calcularEnvio(createEnvioDto: CreateEnvioDto): Promise<Envio> {
+  async calcularEnvio(createEnvioDto: CreateEnvioDto): Promise<EnvioEntity> {
     const flete = this.calcular_costo_envio(
       createEnvioDto.distancia,
       createEnvioDto.peso,
@@ -107,20 +116,42 @@ export class TabuladorService {
     return this.envioRepository.save(nuevoEnvio);
   }
 
-  async crearOrdenEnvio(createEnvioDto: CreateEnvioDto): Promise<Envio> {
-    const envio = await this.calcularEnvio(createEnvioDto);
+  async crearOrdenEnvio(
+    createEnvioDto: CreateEnvioDto,
+    id: string,
+  ): Promise<EnvioEntity> {
+    const user = await this.usersService.findUserByID(id);
 
+    if (!user) {
+      throw new NotFoundException(`User with ID "${user.id}" not found`);
+    }
+    const envio = await this.calcularEnvio(createEnvioDto);
     envio.trackingNumber = 'ENV' + Date.now();
     envio.status = 'En proceso';
+    envio.user = user;
     return this.envioRepository.save(envio);
   }
 
   async actualizarEstadoOrden(
     id: number,
     updateEnvioDto: UpdateEnvioDto,
-  ): Promise<Envio> {
+  ): Promise<EnvioEntity> {
     await this.envioRepository.update(id, updateEnvioDto);
 
     return this.findOne(id);
+  }
+
+  async findTabuladorWithRelation(id: number): Promise<EnvioEntity> {
+    const userRelationTabulador = this.envioRepository
+      .createQueryBuilder('envio')
+      .leftJoinAndSelect('envio.user', 'user')
+      .where('envio.id = :id', { id })
+      .getOne();
+
+    if (!userRelationTabulador) {
+      throw new NotFoundException(`Envio with ID "${id}" not found`);
+    }
+
+    return userRelationTabulador;
   }
 }

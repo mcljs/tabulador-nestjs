@@ -5,6 +5,7 @@ import { BaseEntity } from '../../config/base.entity';
 import { ROLES } from '../../config/roles';
 import { IUser } from '../../interfaces/user.interface';
 import { UsersProjectsEntity } from './usersProjects.entity';
+import { EnvioEntity } from 'src/tabulador/entities/envio.entity';
 
 @Entity({ name: 'users' })
 export class UsersEntity extends BaseEntity implements IUser {
@@ -26,4 +27,7 @@ export class UsersEntity extends BaseEntity implements IUser {
 
   @OneToMany(() => UsersProjectsEntity, (usersProjects) => usersProjects.user)
   projectsIncludes: UsersProjectsEntity[];
+
+  @OneToMany(() => EnvioEntity, (usersTabulador) => usersTabulador.user)
+  tabuladorIncludes: EnvioEntity[];
 }

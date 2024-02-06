@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Envio } from './entities/envio.entity';
+import { EnvioEntity } from './entities/envio.entity';
 import { TabuladorService } from './services/tabulador.service';
 import { TabuladorController } from './controllers/tabulador.controller';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Envio])],
+  imports: [UsersModule, TypeOrmModule.forFeature([EnvioEntity])],
   providers: [TabuladorService],
   controllers: [TabuladorController],
 })
