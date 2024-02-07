@@ -38,9 +38,11 @@ export class CreateEnvioDto {
   @Min(0)
   totalAPagar: number;
 
+  @IsOptional()
   @IsString()
   trackingNumber: string;
 
+  @IsOptional()
   @IsString()
   status: string;
 
@@ -55,9 +57,28 @@ export class CreateEnvioDto {
   @IsString()
   tipoArticulo: string;
 
+  @IsOptional()
   @IsNumber()
   @Min(0)
   costoTotal: number;
+}
+
+export class CalculaterDto {
+  @IsNumber()
+  @Min(0)
+  distancia: number;
+
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  peso?: number;
+
+  @IsString()
+  tipoArticulo: string;
+
+  @IsNumber()
+  @Min(0)
+  valorDeclarado: number;
 }
 
 export class UpdateEnvioDto {

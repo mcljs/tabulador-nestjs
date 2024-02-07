@@ -1,9 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { EnvioEntity } from '../entities/envio.entity';
-import { CreateEnvioDto, UpdateEnvioDto } from '../dto/create-envio.dto';
-import { UsersEntity } from 'src/users/entities/users.entity';
+import {
+  CalculaterDto,
+  CreateEnvioDto,
+  UpdateEnvioDto,
+} from '../dto/create-envio.dto';
 import { UsersService } from 'src/users/services/users.service';
 
 @Injectable()
@@ -50,7 +53,7 @@ export class TabuladorService {
 
     const nuevoEnvio = this.envioRepository.create({
       ...createEnvioDto,
-      costoTotal: costo_total,
+      totalAPagar: costo_total,
     });
 
     return this.envioRepository.save(nuevoEnvio);
@@ -81,20 +84,20 @@ export class TabuladorService {
       where: { id },
     });
   }
-  async remove(id: number): Promise<void> {
-    await this.envioRepository.delete(id);
+  async remove(id: number): Promise<DeleteResult> {
+    return await this.envioRepository.delete(id);
   }
 
-  async calcularEnvio(createEnvioDto: CreateEnvioDto): Promise<EnvioEntity> {
+  async calcularEnvio(calculaterDto: CalculaterDto): Promise<EnvioEntity> {
     const flete = this.calcular_costo_envio(
-      createEnvioDto.distancia,
-      createEnvioDto.peso,
-      createEnvioDto.tipoArticulo,
+      calculaterDto.distancia,
+      calculaterDto.peso,
+      calculaterDto.tipoArticulo,
     );
 
     const porcentajeProteccion = 0.01;
     let proteccionEncomienda =
-      createEnvioDto.valorDeclarado * porcentajeProteccion;
+      calculaterDto.valorDeclarado * porcentajeProteccion;
     const proteccionMinima = 5.0;
     proteccionEncomienda = Math.max(proteccionEncomienda, proteccionMinima);
 
@@ -104,7 +107,7 @@ export class TabuladorService {
     const totalAPagar = subtotal + iva + franqueoPostal;
 
     const nuevoEnvio = this.envioRepository.create({
-      ...createEnvioDto,
+      ...calculaterDto,
       flete,
       proteccionEncomienda,
       subtotal,
@@ -113,7 +116,7 @@ export class TabuladorService {
       totalAPagar,
     });
 
-    return this.envioRepository.save(nuevoEnvio);
+    return nuevoEnvio;
   }
 
   async crearOrdenEnvio(

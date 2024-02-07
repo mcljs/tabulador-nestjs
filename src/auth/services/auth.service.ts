@@ -35,6 +35,14 @@ export class AuthService {
     }
   }
 
+  public async getCurrentUser(userId: string): Promise<UsersEntity | null> {
+    try {
+      return await this.userServices.findUserByID(userId);
+    } catch (error) {
+      throw new Error('User not found');
+    }
+  }
+
   public async signJWT({ payload, secret, expires }: ISingJWT) {
     return jwt.sign(payload, secret, { expiresIn: expires });
   }

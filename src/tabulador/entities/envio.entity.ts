@@ -1,3 +1,4 @@
+import { IsOptional } from 'class-validator';
 import { UsersEntity } from 'src/users/entities/users.entity';
 import {
   Entity,
@@ -53,9 +54,6 @@ export class EnvioEntity {
 
   @Column()
   tipoArticulo!: string;
-
-  @Column({ type: 'float' })
-  costoTotal: number;
 
   @JoinColumn({
     name: 'user_id',

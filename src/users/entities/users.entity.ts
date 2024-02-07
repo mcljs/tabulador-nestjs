@@ -9,16 +9,20 @@ import { EnvioEntity } from 'src/tabulador/entities/envio.entity';
 
 @Entity({ name: 'users' })
 export class UsersEntity extends BaseEntity implements IUser {
+  @Column({ unique: true })
+  email: string;
+  @Column({ unique: true })
+  username: string;
   @Column()
   firstName: string;
   @Column()
   lastName: string;
   @Column()
-  age: number;
-  @Column({ unique: true })
-  email: string;
-  @Column({ unique: true })
-  username: string;
+  phone: string;
+  @Column()
+  dateOfBirth: string;
+  @Column()
+  city: string;
   @Column()
   @Exclude()
   password: string;

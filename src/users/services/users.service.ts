@@ -19,6 +19,16 @@ export class UsersService {
 
   public async createUser(body: UserDTO): Promise<UsersEntity | null> {
     try {
+      const findByEmailAndUserName = await this.exitUsernameOrEmail(
+        body.username,
+        body.email,
+      );
+      if (findByEmailAndUserName) {
+        throw new ErrorManager({
+          type: 'BAD_REQUEST',
+          message: 'Username or Email already exists',
+        });
+      }
       body.password = await bcrypt.hash(
         body.password,
         Number(process.env.HASH_SALT),
@@ -26,6 +36,27 @@ export class UsersService {
       return await this.userRepository.save(body);
     } catch (error) {
       throw ErrorManager.createSignatureError(error.message);
+    }
+  }
+
+  public async exitUsernameOrEmail(
+    username: string,
+    email: string,
+  ): Promise<boolean> {
+    // eslint-disable-next-line no-useless-catch
+    try {
+      const userFindUsernameOrEmail = await this.userRepository
+        .createQueryBuilder('user')
+        .where('user.username = :username', { username })
+        .orWhere('user.email = :email', { email })
+        .getOne();
+
+      if (userFindUsernameOrEmail) {
+        return true;
+      }
+      return false;
+    } catch (error) {
+      throw ErrorManager.createSignatureError((error as Error).message);
     }
   }
 

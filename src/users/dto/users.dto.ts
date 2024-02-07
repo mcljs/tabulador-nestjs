@@ -21,16 +21,24 @@ export class UserDTO {
   lastName: string;
 
   @IsNotEmpty()
-  @IsNumber()
-  age: number;
-
-  @IsNotEmpty()
   @IsString()
   email: string;
 
   @IsNotEmpty()
   @IsString()
   username: string;
+
+  @IsNotEmpty()
+  @IsString()
+  dateOfBirth: string;
+
+  @IsNotEmpty()
+  @IsString()
+  phone: string;
+
+  @IsNotEmpty()
+  @IsString()
+  city: string;
 
   @IsNotEmpty()
   @IsString()
@@ -51,10 +59,6 @@ export class UserUpdateDTO {
   lastName: string;
 
   @IsOptional()
-  @IsNumber()
-  age: number;
-
-  @IsOptional()
   @IsString()
   email: string;
 
@@ -65,6 +69,10 @@ export class UserUpdateDTO {
   @IsOptional()
   @IsString()
   password: string;
+
+  @IsNotEmpty()
+  @IsString()
+  phone: string;
 
   @IsOptional()
   @IsEnum(ROLES)

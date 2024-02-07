@@ -23,7 +23,9 @@
     "m:gen:dev": "export NODE_ENV=development && npm run orm:init migration:generate",
     "m:run:dev": "export NODE_ENV=development && npm run orm:init migration:run",
     "m:gen:prod": "export NODE_ENV=production && npm run orm:init migration:generate",
-    "m:run:prod": "export NODE_ENV=production && npm run orm:init migration:run"
+    "m:run:prod": "export NODE_ENV=production && npm run orm:init migration:run",
+    "m:revert:dev": "export NODE_ENV=development && npm run orm:init migration:revert",
+    "m:revert:prod": "export NODE_ENV=production && npm run orm:init migration:revert"
   },
   "dependencies": {
     "@nestjs/common": "9.0.0",

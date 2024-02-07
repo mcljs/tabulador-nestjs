@@ -12,17 +12,24 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { TabuladorService } from '../services/tabulador.service';
-import { CreateEnvioDto, UpdateEnvioDto } from '../dto/create-envio.dto';
+import {
+  CalculaterDto,
+  CreateEnvioDto,
+  UpdateEnvioDto,
+} from '../dto/create-envio.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { PublicAccess } from 'src/auth/decorators/public.decorator';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller('envios')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RolesGuard)
 export class TabuladorController {
   constructor(private readonly tabuladorService: TabuladorService) {}
-
+  @PublicAccess()
   @Post('calcularEnvio')
-  calcularEnvio(@Body() createEnvioDto: CreateEnvioDto) {
-    return this.tabuladorService.calcularEnvio(createEnvioDto);
+  calcularEnvio(@Body() calculaterDto: CalculaterDto) {
+    return this.tabuladorService.calcularEnvio(calculaterDto);
   }
 
   @Post('crearOrdenEnvio')
@@ -34,6 +41,7 @@ export class TabuladorController {
     return this.tabuladorService.crearOrdenEnvio(createEnvioDto, idUser);
   }
 
+  @Roles('ADMIN')
   @Patch('actualizarEstadoOrden/:id')
   actualizarEstadoOrden(
     @Param('id') id: string,
@@ -42,6 +50,7 @@ export class TabuladorController {
     return this.tabuladorService.actualizarEstadoOrden(+id, updateEnvioDto);
   }
 
+  @Roles('ADMIN')
   @Get('all')
   async findAll() {
     return await this.tabuladorService.findAll();
