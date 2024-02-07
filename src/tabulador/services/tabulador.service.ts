@@ -130,7 +130,7 @@ export class TabuladorService {
     }
     const envio = await this.calcularEnvio(createEnvioDto);
     envio.trackingNumber = 'ENV' + Date.now();
-    envio.status = 'En proceso';
+    envio.status = 'Por Confirmar';
     envio.user = user;
     return this.envioRepository.save(envio);
   }

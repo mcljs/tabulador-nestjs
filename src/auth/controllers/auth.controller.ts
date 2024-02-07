@@ -36,11 +36,10 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @Get('/me')
   getProfile(@Request() req) {
-    // Ahora puedes acceder a req.user que fue establecido por tu AuthGuard
     const user = req.user;
-    const { password, ...result } = user; // Excluye la contraseña u otros datos sensibles
-    return result;
+    return user; // Devuelve la información del usuario sin la contraseña
   }
 }
