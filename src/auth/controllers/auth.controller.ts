@@ -14,8 +14,6 @@ import { AuthService } from '../services/auth.service';
 import { IAuthLogin } from '../interfaces/auth.interface';
 import { AuthGuard } from '../guards/auth.guard';
 import { UsersService } from 'src/users/services/users.service';
-import { GetUser } from '../decorators/user.decorator';
-import { UsersEntity } from 'src/users/entities/users.entity';
 
 @ApiTags('Auth')
 @Controller('auth')
