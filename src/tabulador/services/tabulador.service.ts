@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { EnvioEntity } from '../entities/envio.entity';
 import {
   CalculaterDto,
@@ -75,14 +75,18 @@ export class TabuladorService {
     });
   }
 
+  async findOneUser(idUser: string): Promise<EnvioEntity[]> {
+    return await this.envioRepository
+      .createQueryBuilder('envio')
+      .where('envio.user = :idUser', { idUser })
+      .getMany();
+  }
+
   async update(
     id: number,
     updateEnvioDto: UpdateEnvioDto,
-  ): Promise<EnvioEntity> {
-    await this.envioRepository.update({ id }, updateEnvioDto);
-    return this.envioRepository.findOne({
-      where: { id },
-    });
+  ): Promise<UpdateResult> {
+    return await this.envioRepository.update({ id }, updateEnvioDto);
   }
   async remove(id: number): Promise<DeleteResult> {
     return await this.envioRepository.delete(id);

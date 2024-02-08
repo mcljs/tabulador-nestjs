@@ -68,12 +68,4 @@ export class UsersController {
   public async deleteUser(@Param('userId') id: string) {
     return await this.UsersService.deleteUser(id);
   }
-
-  @Post('assigned-project')
-  /**
-   * assignedProject
-   */
-  public async assignedProject(@Body() body: AssignedProjectDTO) {
-    return await this.UsersService.assignedProjectRelation(body);
-  }
 }

@@ -9,7 +9,6 @@ import {
 
 import { ACCESS_LEVEL, ROLES } from '../../config/roles';
 import { UsersEntity } from '../entities/users.entity';
-import { ProjectEntity } from '../../projects/entities/projects.entity';
 
 export class UserDTO {
   @IsNotEmpty()
@@ -83,10 +82,6 @@ export class AssignedProjectDTO {
   @IsNotEmpty()
   @IsUUID()
   user: UsersEntity;
-
-  @IsNotEmpty()
-  @IsUUID()
-  project: ProjectEntity;
 
   @IsNotEmpty()
   @IsEnum(ACCESS_LEVEL)

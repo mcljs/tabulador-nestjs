@@ -44,7 +44,7 @@ export class TabuladorController {
   @Roles('ADMIN')
   @Patch('actualizarEstadoOrden/:id')
   actualizarEstadoOrden(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updateEnvioDto: UpdateEnvioDto,
   ) {
     return this.tabuladorService.actualizarEstadoOrden(+id, updateEnvioDto);
@@ -56,9 +56,10 @@ export class TabuladorController {
     return await this.tabuladorService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tabuladorService.findOne(+id);
+  @Get('user')
+  findOneUser(@Req() request: Request) {
+    const { idUser } = request;
+    return this.tabuladorService.findOneUser(idUser);
   }
 
   @Delete(':id')

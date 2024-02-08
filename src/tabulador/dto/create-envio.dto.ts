@@ -1,4 +1,10 @@
-import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class CreateEnvioDto {
   @IsNumber()
@@ -82,5 +88,7 @@ export class CalculaterDto {
 }
 
 export class UpdateEnvioDto {
+  @IsString()
+  @IsNotEmpty()
   status: string;
 }
