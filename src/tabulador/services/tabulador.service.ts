@@ -59,14 +59,28 @@ export class TabuladorService {
     return this.envioRepository.save(nuevoEnvio);
   }
 
-  async findAll(): Promise<EnvioEntity[]> {
-    const envios: EnvioEntity[] = await this.envioRepository.find({
-      relations: ['user'],
-    });
-    if (envios.length === 0) {
-      throw new NotFoundException('Not exits envios list');
+  async findAll(queryParams: any): Promise<[EnvioEntity[], number]> {
+    const { page = 1, limit = 20, trackingNumber, status } = queryParams;
+    const queryBuilder = this.envioRepository.createQueryBuilder('envio');
+
+    if (trackingNumber) {
+      queryBuilder.andWhere('envio.trackingNumber = :trackingNumber', {
+        trackingNumber,
+      });
     }
-    return envios;
+
+    if (status) {
+      queryBuilder.andWhere('envio.status = :status', { status });
+    }
+
+    queryBuilder.leftJoinAndSelect('envio.user', 'user');
+
+    const skip = (page - 1) * limit;
+    queryBuilder.skip(skip).take(limit);
+
+    const [envios, total] = await queryBuilder.getManyAndCount();
+
+    return [envios, total];
   }
 
   async findOne(id: number): Promise<EnvioEntity> {

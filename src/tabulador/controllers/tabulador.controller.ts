@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -52,8 +53,8 @@ export class TabuladorController {
 
   @Roles('ADMIN')
   @Get('all')
-  async findAll() {
-    return await this.tabuladorService.findAll();
+  async findAll(@Query() queryParams: any) {
+    return await this.tabuladorService.findAll(queryParams);
   }
 
   @Get('user')
