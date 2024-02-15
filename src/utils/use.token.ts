@@ -12,6 +12,8 @@ export const useToken = (token: string): IUseToken | string => {
       firstName: decode.firstName,
       lastName: decode.lastName,
       email: decode.email,
+      document_type: decode.document_type,
+      document_number: decode.document_number,
       city: decode.city,
       sub: decode.sub,
       role: decode.role,

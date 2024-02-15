@@ -6,6 +6,8 @@ export interface IPayloadToken {
   firstName: string;
   lastName: string;
   email: string;
+  document_type: string;
+  document_number: string;
   city: string;
   sub: string;
   role: ROLES;
@@ -26,6 +28,8 @@ export interface IAuthTokenResult {
   firstName: string;
   lastName: string;
   email: string;
+  document_type: string;
+  document_number: string;
   city: string;
   role: string;
   sub: string;
@@ -37,6 +41,8 @@ export interface IUseToken {
   firstName: string;
   lastName: string;
   email: string;
+  document_type: string;
+  document_number: string;
   city: string;
   role: string;
   sub: string;

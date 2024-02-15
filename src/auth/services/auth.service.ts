@@ -54,6 +54,8 @@ export class AuthService {
       firstName: getUser.firstName,
       lastName: getUser.lastName,
       email: getUser.email,
+      document_type: getUser.document_type,
+      document_number: getUser.document_number,
       city: getUser.city,
       role: getUser.role,
       sub: getUser.id,

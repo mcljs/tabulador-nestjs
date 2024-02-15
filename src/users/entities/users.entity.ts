@@ -19,6 +19,10 @@ export class UsersEntity extends BaseEntity implements IUser {
   @Column()
   phone: string;
   @Column()
+  document_type: string;
+  @Column({ unique: true })
+  document_number: string;
+  @Column()
   dateOfBirth: string;
   @Column()
   city: string;

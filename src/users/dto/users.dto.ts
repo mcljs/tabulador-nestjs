@@ -25,6 +25,14 @@ export class UserDTO {
 
   @IsNotEmpty()
   @IsString()
+  document_type: string;
+
+  @IsNotEmpty()
+  @IsString()
+  document_number: string;
+
+  @IsNotEmpty()
+  @IsString()
   username: string;
 
   @IsNotEmpty()
@@ -60,6 +68,14 @@ export class UserUpdateDTO {
   @IsOptional()
   @IsString()
   email: string;
+
+  @IsOptional()
+  @IsString()
+  document_type: string;
+
+  @IsOptional()
+  @IsString()
+  document_number: string;
 
   @IsOptional()
   @IsString()
