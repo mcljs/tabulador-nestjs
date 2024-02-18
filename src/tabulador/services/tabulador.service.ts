@@ -8,21 +8,25 @@ import {
   UpdateEnvioDto,
 } from '../dto/create-envio.dto';
 import { UsersService } from 'src/users/services/users.service';
+import { ConfiguracionService } from './configuracion.service';
 
 @Injectable()
 export class TabuladorService {
   constructor(
+    private readonly configuracionService: ConfiguracionService,
     @InjectRepository(EnvioEntity)
     private readonly envioRepository: Repository<EnvioEntity>,
     private readonly usersService: UsersService,
   ) {}
 
-  private calcular_costo_envio(
+  private async calcular_costo_envio(
     distancia: number,
     peso: number,
     tipoArticulo: string,
-  ): number {
-    let costo_por_km = 0.003;
+  ): Promise<number> {
+    const config = await this.configuracionService.obtenerOCrearConfiguracion();
+    let costo_por_km = config.costoPorKm || 0.003;
+    const costoGasolina = config.costoGasolina || 0.49;
 
     if (peso <= 15) {
       costo_por_km += 0.03;
@@ -35,17 +39,19 @@ export class TabuladorService {
     }
 
     let recargo = 0;
-    if (tipoArticulo === 'Mercancia') {
+    if (peso > 7 || tipoArticulo === 'Mercancia') {
       recargo = 12.0;
     } else if (tipoArticulo === 'Documentos') {
       recargo = 8.0;
     }
 
-    return distancia * costo_por_km + recargo * 2;
+    const costoGasolinaAdicional = distancia * costoGasolina;
+
+    return distancia * costo_por_km + recargo * 2 + costoGasolinaAdicional;
   }
 
   async create(createEnvioDto: CreateEnvioDto): Promise<EnvioEntity> {
-    const costo_total = this.calcular_costo_envio(
+    const costo_total = await this.calcular_costo_envio(
       createEnvioDto.distancia,
       createEnvioDto.peso,
       createEnvioDto.tipoArticulo,
@@ -107,21 +113,23 @@ export class TabuladorService {
   }
 
   async calcularEnvio(calculaterDto: CalculaterDto): Promise<EnvioEntity> {
-    const flete = this.calcular_costo_envio(
+    const flete = await this.calcular_costo_envio(
       calculaterDto.distancia,
       calculaterDto.peso,
       calculaterDto.tipoArticulo,
     );
 
-    const porcentajeProteccion = 0.01;
+    const config = await this.configuracionService.obtenerOCrearConfiguracion();
+    const porcentajeProteccion = config.porcentajeProteccion || 0.01;
+    const proteccionMinima = config.proteccionMinima || 5.0;
+    const franqueoPostal = config.franqueoPostal || 2.0;
+
     let proteccionEncomienda =
       calculaterDto.valorDeclarado * porcentajeProteccion;
-    const proteccionMinima = 5.0;
     proteccionEncomienda = Math.max(proteccionEncomienda, proteccionMinima);
 
     const subtotal = flete + proteccionEncomienda;
     const iva = subtotal * 0.16;
-    const franqueoPostal = 2.0;
     const totalAPagar = subtotal + iva + franqueoPostal;
 
     const nuevoEnvio = this.envioRepository.create({

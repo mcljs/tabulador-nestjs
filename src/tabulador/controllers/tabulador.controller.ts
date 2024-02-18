@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { TabuladorService } from '../services/tabulador.service';
+import { ConfiguracionService } from '../services/configuracion.service';
 import {
   CalculaterDto,
   CreateEnvioDto,
@@ -22,11 +23,15 @@ import { AuthGuard } from 'src/auth/guards/auth.guard';
 import { PublicAccess } from 'src/auth/decorators/public.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+import { UpdateConfiguracionDto } from '../dto/update-configuracion.dto';
 
 @Controller('envios')
 @UseGuards(AuthGuard, RolesGuard)
 export class TabuladorController {
-  constructor(private readonly tabuladorService: TabuladorService) {}
+  constructor(
+    private readonly tabuladorService: TabuladorService,
+    private readonly configuracionService: ConfiguracionService,
+  ) {}
   @PublicAccess()
   @Post('calcularEnvio')
   calcularEnvio(@Body() calculaterDto: CalculaterDto) {
@@ -49,6 +54,23 @@ export class TabuladorController {
     @Body() updateEnvioDto: UpdateEnvioDto,
   ) {
     return this.tabuladorService.actualizarEstadoOrden(+id, updateEnvioDto);
+  }
+
+  @Roles('ADMIN')
+  @Get('configuracion')
+  obtenerConfiguracionActual() {
+    return this.configuracionService.obtenerOCrearConfiguracion();
+  }
+
+  @Roles('ADMIN')
+  @Patch('configuracion')
+  actualizarConfiguracion(
+    @Body() updateConfiguracionDto: UpdateConfiguracionDto,
+  ) {
+    return this.configuracionService.actualizarConfiguracion(
+      1,
+      updateConfiguracionDto,
+    );
   }
 
   @Roles('ADMIN')
