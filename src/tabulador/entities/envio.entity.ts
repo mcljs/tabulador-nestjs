@@ -1,4 +1,3 @@
-import { IsOptional } from 'class-validator';
 import { UsersEntity } from 'src/users/entities/users.entity';
 import {
   Entity,
@@ -13,7 +12,7 @@ export class EnvioEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ type: 'float' })
   distancia!: number;
 
   @Column({ nullable: true })
