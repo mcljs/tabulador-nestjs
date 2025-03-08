@@ -24,6 +24,14 @@ export class ConfiguracionService {
         porcentajeProteccion: 0.01,
         proteccionMinima: 5.0,
         franqueoPostal: 2.0,
+        // Nuevos valores
+        costoHospedaje: 30.0,
+        aplicableHospedaje: 'EXPRESS',
+        consumoSusukiEECO: 0.08,
+        consumoMitsubishiL300: 0.12,
+        consumoNHR: 0.14,
+        consumoCanterCavaCorta: 0.18,
+        consumoCanterCavaLarga: 0.25,
       });
       await this.configuracionRepository.save(configuracion);
     }

@@ -59,4 +59,33 @@ export class EnvioEntity {
   })
   @ManyToOne(() => UsersEntity, (user) => user.tabuladorIncludes)
   user: UsersEntity;
+
+  // Nuevos campos según los requerimientos:
+
+  @Column({ type: 'enum', enum: ['NORMAL', 'EXPRESS'], default: 'NORMAL' })
+  tipoEnvio!: string;
+
+  @Column({ type: 'boolean', default: false })
+  esSobre!: boolean;
+
+  // Dimensiones para cálculo de volumen
+  @Column({ type: 'float', nullable: true })
+  ancho?: number;
+
+  @Column({ type: 'float', nullable: true })
+  alto?: number;
+
+  @Column({ type: 'float', nullable: true })
+  largo?: number;
+
+  @Column({ type: 'float', nullable: true })
+  volumen?: number;
+
+  // Vehículo asignado al envío (SUSUKI_EECO, MITSUBISHI_L300, NHR, CANTER_CAVA_CORTA, CANTER_CAVA_LARGA)
+  @Column({ nullable: true })
+  tipoVehiculo?: string;
+
+  // Costo de hospedaje para distancias mayores a 400km
+  @Column({ type: 'float', default: 0 })
+  costoHospedaje!: number;
 }

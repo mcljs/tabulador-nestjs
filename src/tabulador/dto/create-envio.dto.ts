@@ -1,9 +1,12 @@
 import {
+  IsBoolean,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   Min,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateEnvioDto {
@@ -63,10 +66,42 @@ export class CreateEnvioDto {
   @IsString()
   tipoArticulo: string;
 
+  // Nuevos campos
+  @IsEnum(['NORMAL', 'EXPRESS'])
+  tipoEnvio: string;
+
+  @IsBoolean()
+  esSobre: boolean;
+
+  // Solo se requieren dimensiones si no es un sobre
+  @ValidateIf(o => !o.esSobre)
+  @IsNumber()
+  @Min(0)
+  ancho: number;
+
+  @ValidateIf(o => !o.esSobre)
+  @IsNumber()
+  @Min(0)
+  alto: number;
+
+  @ValidateIf(o => !o.esSobre)
+  @IsNumber()
+  @Min(0)
+  largo: number;
+
   @IsOptional()
   @IsNumber()
   @Min(0)
-  costoTotal: number;
+  volumen?: number;
+
+  @IsOptional()
+  @IsString()
+  tipoVehiculo?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  costoHospedaje?: number;
 }
 
 export class CalculaterDto {
@@ -85,6 +120,29 @@ export class CalculaterDto {
   @IsNumber()
   @Min(0)
   valorDeclarado: number;
+
+  // Nuevos campos
+  @IsEnum(['NORMAL', 'EXPRESS'])
+  tipoEnvio: string;
+
+  @IsBoolean()
+  esSobre: boolean;
+
+  // Solo se requieren dimensiones si no es un sobre
+  @ValidateIf(o => !o.esSobre)
+  @IsNumber()
+  @Min(0)
+  ancho: number;
+
+  @ValidateIf(o => !o.esSobre)
+  @IsNumber()
+  @Min(0)
+  alto: number;
+
+  @ValidateIf(o => !o.esSobre)
+  @IsNumber()
+  @Min(0)
+  largo: number;
 }
 
 export class UpdateEnvioDto {
