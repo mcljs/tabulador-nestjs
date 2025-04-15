@@ -24,9 +24,10 @@ export class ConfiguracionService {
         porcentajeProteccion: 0.01,
         proteccionMinima: 5.0,
         franqueoPostal: 2.0,
-        // Nuevos valores
+        // Configuración de hospedaje
         costoHospedaje: 30.0,
         aplicableHospedaje: 'EXPRESS',
+        // Consumo de combustible por vehículo
         consumoSusukiEECO: 0.08,
         consumoMitsubishiL300: 0.12,
         consumoNHR: 0.14,
@@ -35,6 +36,20 @@ export class ConfiguracionService {
       });
       await this.configuracionRepository.save(configuracion);
     }
+
+    // Añadimos estas propiedades al objeto de configuración aunque no estén en la BD
+    // Esto evita errores si el código intenta acceder a estas propiedades
+    configuracion = {
+      ...configuracion,
+      costoPeajeSusuki: 0.8,
+      costoPeajeL300: 0.8,
+      costoPeajeNHR: 1.2,
+      costoPeajeCanterCorta: 1.2,
+      costoPeajeCanterLarga: 1.2,
+      costoPeajePlatforma: 1.2,
+      costoPeajePitman: 1.2,
+      costoPeajeChuto: 6.0,
+    };
 
     return configuracion;
   }

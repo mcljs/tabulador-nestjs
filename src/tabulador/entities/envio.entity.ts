@@ -5,6 +5,8 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -88,4 +90,26 @@ export class EnvioEntity {
   // Costo de hospedaje para distancias mayores a 400km
   @Column({ type: 'float', default: 0 })
   costoHospedaje!: number;
+  
+  // Nuevos campos para peajes
+  @Column({ type: 'int', default: 0 })
+  cantidadPeajes!: number;
+  
+  @Column({ type: 'float', default: 0 })
+  costoPeaje!: number;
+  
+  @Column({ type: 'float', default: 0 })
+  totalPeaje!: number;
+
+  @CreateDateColumn({
+    type: 'timestamp',
+    name: 'created_at',
+  })
+  createdAt: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+    name: 'updated_at',
+  })
+  updatedAt: Date;
 }

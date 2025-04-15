@@ -80,24 +80,107 @@ export class TabuladorService {
   }
 
   /**
-   * Obtiene el consumo de combustible según el tipo de vehículo
+   * Obtiene el costo según el tipo de vehículo para peaje
    */
-  private obtenerConsumoCombustible(
-    tipoVehiculo: string,
-    config: any,
-  ): number {
+  private obtenerCostoVehiculoPeaje(tipoVehiculo: string): number {
+    // Usar valores codificados en lugar de la configuración
     switch (tipoVehiculo) {
       case 'SUSUKI_EECO':
-        return config.consumoSusukiEECO;
       case 'MITSUBISHI_L300':
-        return config.consumoMitsubishiL300;
+        return 0.8;
       case 'NHR':
-        return config.consumoNHR;
       case 'CANTER_CAVA_CORTA':
-        return config.consumoCanterCavaCorta;
       case 'CANTER_CAVA_LARGA':
+        return 1.2;
+      case 'CHUTO':
+        return 6.0;
       default:
-        return config.consumoCanterCavaLarga;
+        return 1.2;
+    }
+  }
+
+  /**
+   * Obtiene el costo de peaje según la distancia y el tipo de vehículo
+   */
+  private obtenerCostoPeaje(distancia: number, tipoVehiculo: string): { cantidadPeajes: number, costoPeaje: number, totalPeaje: number } {
+    let cantidadPeajes = 0;
+    
+    // Determinamos la cantidad de peajes según la distancia
+    if (distancia <= 100) {
+      cantidadPeajes = 1;
+    } else if (distancia <= 250) {
+      cantidadPeajes = 2;
+    } else if (distancia <= 600) {
+      cantidadPeajes = 6;
+    } else {
+      cantidadPeajes = 8;
+    }
+    
+    // Obtenemos el costo unitario del peaje según el tipo de vehículo
+    const costoPeajeUnitario = this.obtenerCostoVehiculoPeaje(tipoVehiculo);
+    
+    // Calculamos el costo total de peajes
+    const costoPeaje = costoPeajeUnitario * cantidadPeajes;
+    
+    return { 
+      cantidadPeajes, 
+      costoPeaje: costoPeajeUnitario,
+      totalPeaje: costoPeaje
+    };
+  }
+
+  /**
+   * Obtener factor de multiplicación por KM según la distancia
+   */
+  private obtenerFactorDistancia(distancia: number): number {
+    if (distancia <= 100) {
+      return 0.045; // Factor 0.045 hasta 100 KM
+    } else if (distancia <= 250) {
+      return 0.04; // Factor 0.04 hasta 250 KM
+    } else if (distancia <= 600) {
+      return 0.03; // Factor 0.03 hasta 600 KM
+    } else {
+      return 0.02; // Factor 0.02 desde 600 KM en adelante
+    }
+  }
+
+  /**
+   * Obtener factor de multiplicación por peso
+   */
+  private obtenerFactorPeso(peso: number, distancia: number): number {
+    // Definimos diferentes factores según la tabla para cada rango de distancia
+    if (distancia <= 100) {
+      if (peso <= 10) {
+        return 2.0;
+      } else if (peso <= 20) {
+        return 1.2;
+      } else {
+        return 1.0;
+      }
+    } else if (distancia <= 250) {
+      if (peso <= 10) {
+        return 1.5;
+      } else if (peso <= 20) {
+        return 1.2;
+      } else {
+        return 0.9;
+      }
+    } else if (distancia <= 600) {
+      if (peso <= 10) {
+        return 0.5;
+      } else if (peso <= 20) {
+        return 1.0;
+      } else {
+        return 1.5;
+      }
+    } else {
+      if (peso <= 10) {
+        return 0.5;
+      } else if (peso <= 20) {
+        return 1.0;
+      } else {
+        return 1.5;
+      }
     }
   }
 
@@ -113,7 +196,15 @@ export class TabuladorService {
     ancho?: number,
     alto?: number, 
     largo?: number,
-  ): Promise<{ flete: number; tipoVehiculo: string; costoHospedaje: number; volumen: number }> {
+  ): Promise<{ 
+    flete: number; 
+    tipoVehiculo: string; 
+    costoHospedaje: number; 
+    volumen: number;
+    cantidadPeajes: number;
+    costoPeaje: number;
+    totalPeaje: number;
+  }> {
     const config = await this.configuracionService.obtenerOCrearConfiguracion();
     
     // Calcular volumen si es un paquete (no es sobre)
@@ -125,13 +216,23 @@ export class TabuladorService {
     // Determinar tipo de vehículo adecuado
     const tipoVehiculo = this.determinarTipoVehiculo(peso, volumen);
     
-    // Obtener consumo de combustible según el vehículo
-    const consumoCombustible = this.obtenerConsumoCombustible(tipoVehiculo, config);
+    // Obtener información de peaje según distancia y tipo de vehículo
+    const { cantidadPeajes, costoPeaje, totalPeaje } = this.obtenerCostoPeaje(distancia, tipoVehiculo);
     
-    // Cálculo del costo de combustible
-    const costoCombustible = distancia * consumoCombustible * config.costoGasolina;
+    // Obtener factor por distancia
+    const factorDistancia = this.obtenerFactorDistancia(distancia);
     
-    // Costo base según el tipo de artículo
+    // Obtener factor por peso
+    const factorPeso = this.obtenerFactorPeso(peso, distancia);
+    
+    // Calcular el costo base por kilómetro y peso
+    const costoPorKm = distancia * factorDistancia;
+    const costoPorPeso = peso * factorPeso;
+    
+    // Calcular relación precio/km
+    const relacionPrecioKm = costoPorKm * factorPeso;
+    
+    // Costo base según el tipo de artículo (sobre o paquete)
     let costoBase = 0;
     if (esSobre) {
       costoBase = 8.0; // Sobre (peso <= 1kg)
@@ -151,14 +252,18 @@ export class TabuladorService {
       costoHospedaje = config.costoHospedaje;
     }
     
-    // Cálculo del flete final
-    const flete = (costoCombustible + costoBase * 2) * factorTipoEnvio;
+    // Cálculo del flete final utilizando la fórmula de la tabla:
+    // COSTO DEL PEAJE + COSTO DEL PESO + RELACIÓN PRECIO/KM
+    const flete = (totalPeaje + costoPorPeso + relacionPrecioKm) * factorTipoEnvio;
     
     return { 
       flete, 
       tipoVehiculo,
       costoHospedaje,
-      volumen
+      volumen,
+      cantidadPeajes,
+      costoPeaje,
+      totalPeaje
     };
   }
 
@@ -175,7 +280,15 @@ export class TabuladorService {
       valorDeclarado 
     } = createEnvioDto;
     
-    const { flete, tipoVehiculo, costoHospedaje, volumen } = await this.calcular_costo_envio(
+    const { 
+      flete, 
+      tipoVehiculo, 
+      costoHospedaje, 
+      volumen,
+      cantidadPeajes,
+      costoPeaje,
+      totalPeaje 
+    } = await this.calcular_costo_envio(
       distancia,
       peso,
       tipoArticulo,
@@ -192,11 +305,11 @@ export class TabuladorService {
     const proteccionMinima = config.proteccionMinima || 5.0;
     const franqueoPostal = config.franqueoPostal || 2.0;
   
-    // Calculamos la protección igual que en calcularEnvio
+    // Calculamos la protección
     let proteccionEncomienda = valorDeclarado * porcentajeProteccion;
     proteccionEncomienda = Math.max(proteccionEncomienda, proteccionMinima);
   
-    // Calculamos el subtotal, IVA y total de la misma manera
+    // Calculamos el subtotal, IVA y total
     const subtotal = flete + proteccionEncomienda + costoHospedaje;
     const iva = subtotal * 0.16;
     const totalAPagar = subtotal + iva + franqueoPostal;
@@ -212,6 +325,9 @@ export class TabuladorService {
       iva,
       franqueoPostal,
       totalAPagar,
+      cantidadPeajes,
+      costoPeaje,
+      totalPeaje
     });
   
     return this.envioRepository.save(nuevoEnvio);
@@ -283,7 +399,15 @@ export class TabuladorService {
       valorDeclarado 
     } = calculaterDto;
 
-    const { flete, tipoVehiculo, costoHospedaje, volumen } = await this.calcular_costo_envio(
+    const { 
+      flete, 
+      tipoVehiculo, 
+      costoHospedaje, 
+      volumen,
+      cantidadPeajes,
+      costoPeaje,
+      totalPeaje
+    } = await this.calcular_costo_envio(
       distancia,
       peso,
       tipoArticulo,
@@ -317,6 +441,9 @@ export class TabuladorService {
       iva,
       franqueoPostal,
       totalAPagar,
+      cantidadPeajes,
+      costoPeaje,
+      totalPeaje
     });
 
     return nuevoEnvio;

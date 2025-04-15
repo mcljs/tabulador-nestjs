@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity({ name: 'configuracion' })
 export class Configuracion {
   @PrimaryGeneratedColumn()
   id: number;
@@ -20,16 +20,12 @@ export class Configuracion {
   @Column({ type: 'float', default: 2.0 })
   franqueoPostal: number;
 
-  // Nuevos campos requeridos
-  
-  // Configuración para hospedaje
   @Column({ type: 'float', default: 30.0 })
   costoHospedaje: number;
 
-  @Column({ type: 'enum', enum: ['EXPRESS', 'TODOS'], default: 'EXPRESS' })
+  @Column({ type: 'varchar', default: 'EXPRESS' })
   aplicableHospedaje: string;
 
-  // Consumo de combustible por vehículo (en Lts/Km)
   @Column({ type: 'float', default: 0.08 })
   consumoSusukiEECO: number;
 
@@ -44,4 +40,29 @@ export class Configuracion {
 
   @Column({ type: 'float', default: 0.25 })
   consumoCanterCavaLarga: number;
+  
+  // Costos de peaje por tipo de vehículo
+  @Column({ type: 'float', default: 0.8 })
+  costoPeajeSusuki: number;
+  
+  @Column({ type: 'float', default: 0.8 })
+  costoPeajeL300: number;
+  
+  @Column({ type: 'float', default: 1.2 })
+  costoPeajeNHR: number;
+  
+  @Column({ type: 'float', default: 1.2 })
+  costoPeajeCanterCorta: number;
+  
+  @Column({ type: 'float', default: 1.2 })
+  costoPeajeCanterLarga: number;
+  
+  @Column({ type: 'float', default: 1.2 })
+  costoPeajePlatforma: number;
+  
+  @Column({ type: 'float', default: 1.2 })
+  costoPeajePitman: number;
+  
+  @Column({ type: 'float', default: 6.0 })
+  costoPeajeChuto: number;
 }
