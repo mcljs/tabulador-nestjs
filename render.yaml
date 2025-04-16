@@ -3,7 +3,7 @@ services:
     name: tabulador-api
     env: node
     plan: free
-    buildCommand: npm ci && npm run build
+    buildCommand: npm install && npm run build
     startCommand: npm run start:prod
     envVars:
       - key: NODE_ENV
@@ -11,29 +11,27 @@ services:
       - key: PORT
         value: 3000
       - key: DB_PORT
-        fromDatabase:
-          name: tabulador-db
-          property: port
+        value: 5432
       - key: DB_HOST
-        fromDatabase:
-          name: tabulador-db
-          property: host
+        value: dpg-cnhb5rnqd2ns73fu10a0-a
       - key: DB_DATABASE
-        fromDatabase:
-          name: tabulador-db
-          property: database
+        value: tabulador_pg
       - key: DB_USER
-        fromDatabase:
-          name: tabulador-db
-          property: user
+        value: tabulador_user
       - key: DB_PASSWORD
-        fromDatabase:
-          name: tabulador-db
-          property: password
+        sync: false
       - key: HASH_SALT
         value: 10
       - key: JWT_SECRET
         generateValue: true
+    buildFilter:
+      paths:
+        - package.json
+        - src/**
+        - nest-cli.json
+        - tsconfig.json
+        - tsconfig.build.json
+    autoDeploy: false
 
 databases:
   - name: tabulador-db
