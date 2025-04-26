@@ -17,7 +17,7 @@ export class EnvioEntity {
   @Column({ type: 'float' })
   distancia!: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'float', nullable: true }) // Cambiado de integer a float
   peso!: number;
 
   @Column({ type: 'float' })
@@ -83,7 +83,7 @@ export class EnvioEntity {
   @Column({ type: 'float', nullable: true })
   volumen?: number;
 
-  // Vehículo asignado al envío (SUSUKI_EECO, MITSUBISHI_L300, NHR, CANTER_CAVA_CORTA, CANTER_CAVA_LARGA)
+  // Vehículo asignado al envío
   @Column({ nullable: true })
   tipoVehiculo?: string;
 
@@ -91,7 +91,7 @@ export class EnvioEntity {
   @Column({ type: 'float', default: 0 })
   costoHospedaje!: number;
   
-  // Nuevos campos para peajes
+  // Campos para peajes
   @Column({ type: 'int', default: 0 })
   cantidadPeajes!: number;
   

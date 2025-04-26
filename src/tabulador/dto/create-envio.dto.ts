@@ -17,7 +17,7 @@ export class CreateEnvioDto {
   @IsNumber()
   @IsOptional()
   @Min(0)
-  peso?: number;
+  peso?: number; // Este campo permite decimales
 
   @IsNumber()
   @Min(0)
@@ -102,6 +102,18 @@ export class CreateEnvioDto {
   @IsNumber()
   @Min(0)
   costoHospedaje?: number;
+  
+  @IsOptional()
+  @IsNumber()
+  cantidadPeajes?: number;
+  
+  @IsOptional()
+  @IsNumber()
+  costoPeaje?: number;
+  
+  @IsOptional()
+  @IsNumber()
+  totalPeaje?: number;
 }
 
 export class CalculaterDto {
