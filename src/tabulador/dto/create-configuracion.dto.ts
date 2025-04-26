@@ -1,4 +1,4 @@
-import { IsEnum, IsNumber, IsOptional } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, Max, Min } from 'class-validator';
 
 export class CreateConfiguracionDto {
   @IsNumber()
@@ -11,6 +11,8 @@ export class CreateConfiguracionDto {
 
   @IsNumber()
   @IsOptional()
+  @Min(0.1)
+  @Max(100)
   porcentajeProteccion?: number;
 
   @IsNumber()
@@ -50,7 +52,72 @@ export class CreateConfiguracionDto {
   @IsNumber()
   @IsOptional()
   consumoCanterCavaLarga?: number;
-}
 
+  // Costos de peaje por tipo de vehículo
+  @IsNumber()
+  @IsOptional()
+  costoPeajeSusuki?: number;
+  
+  @IsNumber()
+  @IsOptional()
+  costoPeajeL300?: number;
+  
+  @IsNumber()
+  @IsOptional()
+  costoPeajeNHR?: number;
+  
+  @IsNumber()
+  @IsOptional()
+  costoPeajeCanterCorta?: number;
+  
+  @IsNumber()
+  @IsOptional()
+  costoPeajeCanterLarga?: number;
+  
+  @IsNumber()
+  @IsOptional()
+  costoPeajePlatforma?: number;
+  
+  @IsNumber()
+  @IsOptional()
+  costoPeajePitman?: number;
+  
+  @IsNumber()
+  @IsOptional()
+  costoPeajeChuto?: number;
+
+  // Constantes para cálculos
+  @IsNumber()
+  @IsOptional()
+  constP2Hasta100Km?: number;
+
+  @IsNumber()
+  @IsOptional()
+  constP1Hasta100Km?: number;
+
+  @IsNumber()
+  @IsOptional()
+  constP2Hasta250Km?: number;
+
+  @IsNumber()
+  @IsOptional()
+  constP1Hasta250Km?: number;
+
+  @IsNumber()
+  @IsOptional()
+  constP2Hasta600Km?: number;
+
+  @IsNumber()
+  @IsOptional()
+  constP1Hasta600Km?: number;
+
+  @IsNumber()
+  @IsOptional()
+  constP2Desde600Km?: number;
+
+  @IsNumber()
+  @IsOptional()
+  constP1Desde600Km?: number;
+}
 
 export class UpdateConfiguracionDto extends CreateConfiguracionDto {}
