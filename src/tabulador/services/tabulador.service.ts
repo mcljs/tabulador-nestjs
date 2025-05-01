@@ -229,106 +229,102 @@ export class TabuladorService {
   /**
    * Calcula el costo del envío basado en la nueva fórmula
    */
-  private async calcular_costo_envio(
-    distancia: number,
-    peso: number,
-    tipoArticulo: string,
-    tipoEnvio: string,
-    esSobre: boolean,
-    valorDeclarado: number,
-    ancho?: number,
-    alto?: number, 
-    largo?: number,
-  ): Promise<{ 
-    flete: number; 
-    tipoVehiculo: string; 
-    costoHospedaje: number; 
-    volumen: number;
-    cantidadPeajes: number;
-    costoPeaje: number;
-    totalPeaje: number;
-    proteccionEncomienda: number;
-    subtotal: number;
-    iva: number;
-    franqueoPostal: number;
-    totalAPagar: number;
-  }> {
-    const config = await this.configuracionService.obtenerOCrearConfiguracion();
-    
-    // Calcular volumen si es un paquete (no es sobre)
-    let volumen = 0;
-    if (!esSobre && ancho && alto && largo) {
-      volumen = this.calcularVolumen(ancho, alto, largo);
-    }
-    
-    // Determinar tipo de vehículo adecuado
-    const tipoVehiculo = this.determinarTipoVehiculo(peso, volumen);
-    
-    // Obtener información de peaje según distancia y tipo de vehículo
-    const { cantidadPeajes, costoPeaje, totalPeaje } = this.obtenerCostoPeaje(
-      distancia, 
-      tipoVehiculo, 
-      config
-    );
-    
-    // Calcular factor_P - factor por peso
-    const factorP = this.calcularFactorP(peso, distancia, config);
-    
-    // Calcular factor_K - factor por distancia
-    const factorK = this.calcularFactorK(distancia, tipoEnvio, tipoVehiculo, config);
-    
-    // Calcular costo por peso
-    const costoPorPeso = peso * factorP;
-    
-    // Calcular protección de encomienda (3.5% del valor declarado)
-    const porcentajeProteccion = config.porcentajeProteccion || 0.035; // Por defecto 3.5%
-    let proteccionEncomienda = valorDeclarado * porcentajeProteccion;
-    proteccionEncomienda = Math.max(proteccionEncomienda, config.proteccionMinima || 5.0);
-    
-    // Calcular hospedaje si aplica
-    let costoHospedaje = 0;
-    if (distancia > 400 &&
-       (tipoEnvio === 'EXPRESS' || config.aplicableHospedaje === 'TODOS')) {
-      costoHospedaje = config.costoHospedaje;
-    }
-    
-    // SUBT1: peaje + (kg * fact_P) + fact_K + prot
-    const subtotal1 = totalPeaje + costoPorPeso + factorK + proteccionEncomienda;
-    
-    // SUB2: (sub1/1.3) + prot
-    const subtotal2 = (subtotal1 / 1.3) + proteccionEncomienda;
-    
-    // Subtotal ajustado según fórmula
-    const subtotal = subtotal2 + costoHospedaje;
-    
-    // IVA: subtotal * 0.16
-    const iva = subtotal * 0.16;
-    
-    // Franqueo postal (valor de configuración)
-    const franqueoPostal = config.franqueoPostal || 2.0;
-    
-    // TOTAL: subtotal + iva + franqueoPostal
-    const totalAPagar = subtotal + iva + franqueoPostal;
-    
-    // Para mantener compatibilidad con el sistema anterior, 
-    // asignamos el subtotal2 al "flete"
-    const flete = subtotal2;
-    
-    return { 
-      flete, 
-      tipoVehiculo,
-      costoHospedaje,
-      volumen,
-      cantidadPeajes,
-      costoPeaje,
-      totalPeaje,
-      proteccionEncomienda,
-      subtotal,
-      iva,
-      franqueoPostal,
-      totalAPagar
-    };
+private async calcular_costo_envio(
+  distancia: number,
+  peso: number,
+  tipoArticulo: string,
+  tipoEnvio: string,
+  esSobre: boolean,
+  valorDeclarado: number,
+  ancho?: number,
+  alto?: number, 
+  largo?: number,
+): Promise<{ 
+  flete: number; 
+  tipoVehiculo: string; 
+  costoHospedaje: number; 
+  volumen: number;
+  cantidadPeajes: number;
+  costoPeaje: number;
+  totalPeaje: number;
+  proteccionEncomienda: number;
+  subtotal: number;
+  iva: number;
+  franqueoPostal: number;
+  totalAPagar: number;
+}> {
+  const config = await this.configuracionService.obtenerOCrearConfiguracion();
+  
+  // Calcular volumen si es un paquete (no es sobre)
+  let volumen = 0;
+  if (!esSobre && ancho && alto && largo) {
+    volumen = this.calcularVolumen(ancho, alto, largo);
   }
+  
+  // Determinar tipo de vehículo adecuado
+  const tipoVehiculo = this.determinarTipoVehiculo(peso, volumen);
+  
+  // Obtener información de peaje según distancia y tipo de vehículo
+  const { cantidadPeajes, costoPeaje, totalPeaje } = this.obtenerCostoPeaje(
+    distancia, 
+    tipoVehiculo, 
+    config
+  );
+  
+  // Calcular factor_P - factor por peso
+  const factorP = this.calcularFactorP(peso, distancia, config);
+  
+  // Calcular factor_K - factor por distancia
+  const factorK = this.calcularFactorK(distancia, tipoEnvio, tipoVehiculo, config);
+  
+  // Calcular costo por peso
+  const costoPorPeso = peso * factorP;
+  
+  // Calcular protección de encomienda (3.5% del valor declarado)
+  const porcentajeProteccion = config.porcentajeProteccion || 3.5; // Por defecto 3.5%
+  let proteccionEncomienda = valorDeclarado * (porcentajeProteccion / 100); // Convertir a decimal para el cálculo
+  proteccionEncomienda = Math.max(proteccionEncomienda, config.proteccionMinima || 5.0);
+  
+  // Calcular hospedaje si aplica
+  let costoHospedaje = 0;
+  if (distancia > 400 &&
+     (tipoEnvio === 'EXPRESS' || config.aplicableHospedaje === 'TODOS')) {
+    costoHospedaje = config.costoHospedaje;
+  }
+  
+  // Calcular subtotal1 SIN incluir la protección
+  const subtotal1 = totalPeaje + costoPorPeso + factorK;
+  
+  // Calcular el flete sin incluir la protección
+  const flete = subtotal1 / 1.3;
+  
+  // Calcular subtotal (flete + protección + hospedaje)
+  const subtotal = flete + proteccionEncomienda + costoHospedaje;
+  
+  // IVA: subtotal * 0.16
+  const iva = subtotal * 0.16;
+  
+  // Franqueo postal (valor de configuración)
+  const franqueoPostal = config.franqueoPostal || 2.0;
+  
+  // TOTAL: subtotal + iva + franqueoPostal
+  const totalAPagar = subtotal + iva + franqueoPostal;
+  
+  return { 
+    flete, 
+    tipoVehiculo,
+    costoHospedaje,
+    volumen,
+    cantidadPeajes,
+    costoPeaje,
+    totalPeaje,
+    proteccionEncomienda,
+    subtotal,
+    iva,
+    franqueoPostal,
+    totalAPagar
+  };
+}
 
   async create(createEnvioDto: CreateEnvioDto): Promise<EnvioEntity> {
     const { 
