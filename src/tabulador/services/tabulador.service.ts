@@ -186,45 +186,62 @@ export class TabuladorService {
     }
   }
 
-  /**
-   * Calcula el factor_P basado en el nuevo algoritmo
-   */
-  private calcularFactorP(peso: number, distancia: number, config: any): number {
-    let constP1 = 0;
-    let constP2 = 0;
+/**
+ * Calcula el factor_P basado en el algoritmo mostrado en el Excel
+ */
+private calcularFactorP(peso: number, distancia: number, config: any): number {
+  let constP1 = 0;
+  let constP2 = 0;
+  let factorP = 0;
+  
+  // Asignar valores de constantes según la distancia
+  if (distancia <= 100) {
+    // Para hasta 100 km: P1 = 2, P2 = 0.05, rango 1-2 (se resta)
+    constP1 = config.constP1Hasta100Km || 2;
+    constP2 = config.constP2Hasta100Km || 0.05;
     
-    // Asignar valores de constantes según la distancia
-    if (distancia <= 100) {
-      constP1 = config.constP1Hasta100Km;
-      constP2 = config.constP2Hasta100Km;
-    } else if (distancia <= 250) {
-      constP1 = config.constP1Hasta250Km;
-      constP2 = config.constP2Hasta250Km;
-    } else if (distancia <= 600) {
-      constP1 = config.constP1Hasta600Km;
-      constP2 = config.constP2Hasta600Km;
-    } else {
-      constP1 = config.constP1Desde600Km;
-      constP2 = config.constP2Desde600Km;
-    }
+    // Cálculo: P1 - (peso * P2)
+    factorP = constP1 - (peso * constP2);
     
-    // Calcular factor_P según la fórmula: const_P1 - (kg * const_P2)
-    let factorP = constP1 - (peso * constP2);
+    // Aplicar límites: min = 1, max = 2
+    factorP = Math.max(1, Math.min(factorP, 2));
     
-    // Aplicar mínimos y máximos según distancia
-    if (distancia <= 100) {
-      // Rango 1-2
-      factorP = Math.max(1, Math.min(factorP, 2));
-    } else if (distancia <= 250) {
-      // Rango 0.9-1.5
-      factorP = Math.max(0.9, Math.min(factorP, 1.5));
-    } else {
-      // Rango 0.5-1.5
-      factorP = Math.max(0.5, Math.min(factorP, 1.5));
-    }
+  } else if (distancia <= 250) {
+    // Para hasta 250 km: P1 = 1.5, P2 = 0.05, rango 0.9-1.5 (se resta)
+    constP1 = config.constP1Hasta250Km || 1.5;
+    constP2 = config.constP2Hasta250Km || 0.05;
     
-    return factorP;
+    // Cálculo: P1 - (peso * P2)
+    factorP = constP1 - (peso * constP2);
+    
+    // Aplicar límites: min = 0.9, max = 1.5
+    factorP = Math.max(0.9, Math.min(factorP, 1.5));
+    
+  } else if (distancia <= 600) {
+    // Para hasta 600 km: P1 = 0.5, P2 = 0.03, rango 0.5-1.5 (se suma)
+    constP1 = config.constP1Hasta600Km || 0.5;
+    constP2 = config.constP2Hasta600Km || 0.03;
+    
+    // Cálculo: P1 + (peso * P2)
+    factorP = constP1 + (peso * constP2);
+    
+    // Aplicar límites: min = 0.5, max = 1.5
+    factorP = Math.max(0.5, Math.min(factorP, 1.5));
+    
+  } else {
+    // Para desde 600 km en adelante: P1 = 0.5, P2 = 0.06, rango 0.5-1.5 (se suma)
+    constP1 = config.constP1Desde600Km || 0.5;
+    constP2 = config.constP2Desde600Km || 0.06;
+    
+    // Cálculo: P1 + (peso * P2)
+    factorP = constP1 + (peso * constP2);
+    
+    // Aplicar límites: min = 0.5, max = 1.5
+    factorP = Math.max(0.5, Math.min(factorP, 1.5));
   }
+  
+  return factorP;
+}
 
   /**
    * Calcula el costo del envío basado en la nueva fórmula
