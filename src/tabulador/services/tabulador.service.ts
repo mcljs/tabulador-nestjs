@@ -105,40 +105,52 @@ export class TabuladorService {
     }
   }
 
-  /**
-   * Obtiene el costo de peaje según la distancia y el tipo de vehículo
-   */
-  private obtenerCostoPeaje(distancia: number, tipoVehiculo: string, config: any): { cantidadPeajes: number, costoPeaje: number, totalPeaje: number } {
-    let cantidadPeajes = 0;
-    
-    // Determinamos la cantidad de peajes según la distancia
-    if (distancia <= 100) {
-      cantidadPeajes = 1;
-    } else if (distancia <= 250) {
-      cantidadPeajes = 2;
-    } else if (distancia <= 600) {
-      cantidadPeajes = 6;
-    } else {
-      cantidadPeajes = 8;
-    }
-    
-    // Obtenemos el costo unitario del peaje según el tipo de vehículo
-    const costoPeajeUnitario = this.obtenerCostoVehiculoPeaje(tipoVehiculo, config);
-    
-    // Calculamos el costo total de peajes
-    const totalPeaje = costoPeajeUnitario * cantidadPeajes;
-    
-    return { 
-      cantidadPeajes, 
-      costoPeaje: costoPeajeUnitario,
-      totalPeaje
-    };
+/**
+ * Obtiene el costo de peaje según la distancia y el tipo de vehículo
+ */
+private obtenerCostoPeaje(
+  distancia: number, 
+  tipoVehiculo: string, 
+  tipoEnvio: string, // Añadir tipo de envío como parámetro
+  config: any
+): { cantidadPeajes: number, costoPeaje: number, totalPeaje: number } {
+  let cantidadPeajes = 0;
+  
+  // Determinamos la cantidad de peajes según la distancia
+  if (distancia <= 100) {
+    cantidadPeajes = 1;
+  } else if (distancia <= 250) {
+    cantidadPeajes = 2;
+  } else if (distancia <= 600) {
+    cantidadPeajes = 6;
+  } else {
+    cantidadPeajes = 8;
   }
+  
+  // Para envíos EXPRESS, consideramos ida y vuelta en los peajes
+  if (tipoEnvio === 'EXPRESS') {
+    cantidadPeajes = cantidadPeajes * 2;
+  }
+  
+  // Obtenemos el costo unitario del peaje según el tipo de vehículo
+  const costoPeajeUnitario = this.obtenerCostoVehiculoPeaje(tipoVehiculo, config);
+  
+  // Calculamos el costo total de peajes
+  const totalPeaje = costoPeajeUnitario * cantidadPeajes;
+  
+  return { 
+    cantidadPeajes, 
+    costoPeaje: costoPeajeUnitario,
+    totalPeaje
+  };
+}
 
-  /**
-   * Calcula el factor_K basado en la distancia
-   */
-  private calcularFactorK(distancia: number, tipoEnvio: string, tipoVehiculo: string, config: any): number {
+/**
+ * Calcula el factor_K basado en la distancia
+ */
+private calcularFactorK(distancia: number, tipoEnvio: string, tipoVehiculo: string, config: any): number {
+  // Para envío normal, se calcula con el factor de distancia
+  if (tipoEnvio !== 'EXPRESS') {
     let factorDistancia = 0;
     
     if (distancia <= 100) {
@@ -150,22 +162,21 @@ export class TabuladorService {
     } else {
       factorDistancia = 0.02; // Factor 0.02 desde 600 KM en adelante
     }
-
-    // Para envío normal, solo se considera el km de ida
-    let kmAConsiderar = distancia;
     
-    // Para envío express, se considera ida y vuelta
-    if (tipoEnvio === 'EXPRESS') {
-      kmAConsiderar = distancia * 2;
-      
-      // Además, para express se multiplica por el consumo de combustible del vehículo
-      const consumoCombustible = this.obtenerConsumoCombustible(tipoVehiculo, config);
-      return kmAConsiderar * consumoCombustible * config.costoGasolina;
-    }
+    return distancia * factorDistancia;
+  } 
+  // Para envío EXPRESS, se calcula con ida y vuelta y consumo de combustible
+  else {
+    // Se considera ida y vuelta (distancia * 2)
+    const kmTotal = distancia * 2;
     
-    // Para envío normal, se calcula con el factor de distancia
-    return kmAConsiderar * factorDistancia;
+    // Se multiplica por el consumo de combustible del vehículo
+    const consumoCombustible = this.obtenerConsumoCombustible(tipoVehiculo, config);
+    
+    // Se calcula el costo del combustible: km * consumo * precio
+    return kmTotal * consumoCombustible * config.costoGasolina;
   }
+}
 
   /**
    * Obtiene el consumo de combustible según el tipo de vehículo
@@ -282,11 +293,12 @@ private async calcular_costo_envio(
   const tipoVehiculo = this.determinarTipoVehiculo(peso, volumen);
   
   // Obtener información de peaje según distancia y tipo de vehículo
-  const { cantidadPeajes, costoPeaje, totalPeaje } = this.obtenerCostoPeaje(
-    distancia, 
-    tipoVehiculo, 
-    config
-  );
+const { cantidadPeajes, costoPeaje, totalPeaje } = this.obtenerCostoPeaje(
+  distancia, 
+  tipoVehiculo,
+  tipoEnvio, // Añadir tipo de envío
+  config
+);
   
   // Calcular factor_P - factor por peso
   const factorP = this.calcularFactorP(peso, distancia, config);
