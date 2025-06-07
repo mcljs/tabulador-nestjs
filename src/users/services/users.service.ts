@@ -158,6 +158,28 @@ export class UsersService {
 
   public async deleteUser(id: string): Promise<DeleteResult | null> {
     try {
+      // 1. PRIMERO: Verificar que el usuario existe y cargar sus envíos
+      const user = await this.userRepository.findOne({
+        where: { id },
+        relations: ['tabuladorIncludes'], // Cargar los envíos relacionados
+      });
+
+      if (!user) {
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'User not found',
+        });
+      }
+
+      // 2. VALIDACIÓN CLAVE: Verificar si tiene envíos asociados
+      if (user.tabuladorIncludes && user.tabuladorIncludes.length > 0) {
+        throw new ErrorManager({
+          type: 'BAD_REQUEST',
+          message: `Cannot delete user. User has ${user.tabuladorIncludes.length} shipments associated. Please handle the shipments first.`,
+        });
+      }
+
+      // 3. Si no tiene envíos, proceder con la eliminación
       const userDelete: DeleteResult = await this.userRepository.delete(id);
       if (userDelete.affected === 0) {
         throw new ErrorManager({
