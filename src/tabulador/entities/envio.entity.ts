@@ -90,14 +90,14 @@ export class EnvioEntity {
   // Costo de hospedaje para distancias mayores a 400km
   @Column({ type: 'float', default: 0 })
   costoHospedaje!: number;
-  
+
   // Campos para peajes
   @Column({ type: 'int', default: 0 })
   cantidadPeajes!: number;
-  
+
   @Column({ type: 'float', default: 0 })
   costoPeaje!: number;
-  
+
   @Column({ type: 'float', default: 0 })
   totalPeaje!: number;
 

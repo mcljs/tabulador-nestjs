@@ -17,7 +17,7 @@ console.log('Database config:', {
   port: process.env.DB_PORT,
   user: process.env.DB_USER,
   database: process.env.DB_DATABASE,
-  passwordExists: !!process.env.DB_PASSWORD
+  passwordExists: !!process.env.DB_PASSWORD,
 });
 
 export const DataSourceConfig: DataSourceOptions = {

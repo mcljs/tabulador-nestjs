@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualización de Envío</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #17a2b8;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            margin: -20px -20px 20px -20px;
+        }
+        .status-update {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .status-change {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .status-box {
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status-old {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .status-new {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .arrow {
+            font-size: 24px;
+            color: #17a2b8;
+        }
+        .tracking-number {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔄 Actualización de Envío</h1>
+        </div>
+        
+        <p>Hola <strong>{{nombreUsuario}}</strong>,</p>
+        
+        <p>El estado de tu envío ha sido actualizado:</p>
+        
+        <div class="tracking-number">
+            📦 Número de Seguimiento: {{trackingNumber}}
+        </div>
+        
+        <div class="status-update">
+            <h3>Cambio de Estado</h3>
+            <div class="status-change">
+                <div class="status-box status-old">{{estadoAnterior}}</div>
+                <div class="arrow">→</div>
+                <div class="status-box status-new">{{estadoActual}}</div>
+            </div>
+        </div>
+        
+        <p><strong>Fecha de actualización:</strong> {{fechaActualizacion}}</p>
+        
+        <p>Continúa siguiendo el progreso de tu envío con el número de seguimiento proporcionado.</p>
+        
+        <div class="footer">
+            <p>Gracias por confiar en nuestro servicio de envíos</p>
+            <p><small>Este es un email automático, por favor no respondas a este mensaje.</small></p>
+        </div>
+    </div>
+</body>
+</html>

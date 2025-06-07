@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Envío en Tránsito</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #fd7e14;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            margin: -20px -20px 20px -20px;
+        }
+        .tracking-number {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .route-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .route-detail {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .location {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+        .origin {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .destination {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .vehicle-info {
+            background-color: #e2e3e5;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚛 Tu Envío Está en Camino</h1>
+        </div>
+        
+        <p>Hola <strong>{{nombreUsuario}}</strong>,</p>
+        
+        <p>¡Buenas noticias! Tu envío ya está en tránsito y en camino a su destino.</p>
+        
+        <div class="tracking-number">
+            📦 Número de Seguimiento: {{trackingNumber}}
+        </div>
+        
+        <div class="route-info">
+            <h3>🗺️ Información de Ruta</h3>
+            <div class="route-detail">
+                <div class="location origin">📍 Origen: {{origen}}</div>
+                <div style="font-size: 20px;">→</div>
+                <div class="location destination">🎯 Destino: {{destino}}</div>
+            </div>
+        </div>
+        
+        <div class="vehicle-info">
+            <strong>🚚 Vehículo:</strong> {{tipoVehiculo}}
+        </div>
+        
+        <p><strong>Fecha de envío:</strong> {{fechaEnvio}}</p>
+        
+        <p><strong>¿Qué sigue?</strong></p>
+        <ul>
+            <li>Tu paquete está siendo transportado por nuestro equipo</li>
+            <li>Recibirás una notificación cuando sea entregado</li>
+            <li>Puedes contactarnos si tienes alguna pregunta</li>
+        </ul>
+        
+        <div class="footer">
+            <p>Gracias por confiar en nuestro servicio de envíos</p>
+            <p><small>Este es un email automático, por favor no respondas a este mensaje.</small></p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Envío Entregado</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #28a745;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            margin: -20px -20px 20px -20px;
+        }
+        .success-banner {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .tracking-number {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .delivery-details {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .feedback-section {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ Envío Entregado Exitosamente</h1>
+        </div>
+        
+        <p>Hola <strong>{{nombreUsuario}}</strong>,</p>
+        
+        <div class="success-banner">
+            <h2 style="margin: 0; color: #155724;">🎉 ¡Entrega Completada!</h2>
+            <p style="margin: 10px 0 0 0; color: #155724;">Tu envío ha sido entregado exitosamente</p>
+        </div>
+        
+        <div class="tracking-number">
+            📦 Número de Seguimiento: {{trackingNumber}}
+        </div>
+        
+        <div class="delivery-details">
+            <h3>📋 Detalles de la Entrega</h3>
+            <p><strong>🎯 Destino:</strong> {{destino}}</p>
+            <p><strong>📅 Fecha de entrega:</strong> {{fechaEntrega}}</p>
+            <p><strong>✅ Estado:</strong> Entregado</p>
+        </div>
+        
+        <div class="feedback-section">
+            <h3>💭 Tu Opinión es Importante</h3>
+            <p>¿Cómo fue tu experiencia con nuestro servicio? Tu retroalimentación nos ayuda a mejorar continuamente.</p>
+        </div>
+        
+        <p>Esperamos que hayas tenido una excelente experiencia con nuestro servicio de envíos. ¡Gracias por elegirnos!</p>
+        
+        <div class="footer">
+            <p>Gracias por confiar en nuestro servicio de envíos</p>
+            <p><small>Este es un email automático, por favor no respondas a este mensaje.</small></p>
+        </div>
+    </div>
+</body>
+</html>

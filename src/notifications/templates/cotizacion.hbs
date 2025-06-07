@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotización de Envío</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #6f42c1;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            margin: -20px -20px 20px -20px;
+        }
+        .quote-banner {
+            background-color: #e7e3ff;
+            border: 1px solid #b794f6;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .details-table th, .details-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .details-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .costs-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .costs-table th, .costs-table td {
+            padding: 10px;
+            text-align: right;
+            border-bottom: 1px solid #ddd;
+        }
+        .costs-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            text-align: left;
+        }
+        .total-row {
+            background-color: #6f42c1;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .validity-notice {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💰 Cotización de Envío</h1>
+        </div>
+        
+        <p>Hola <strong>{{nombreUsuario}}</strong>,</p>
+        
+        <p>Has solicitado una cotización para tu envío. A continuación encontrarás todos los detalles:</p>
+        
+        <div class="quote-banner">
+            <h3 style="margin: 0; color: #553c9a;">📊 Cotización Generada</h3>
+            <p style="margin: 5px 0 0 0; color: #553c9a;">Fecha: {{fechaCotizacion}}</p>
+        </div>
+        
+        <div class="details-section">
+            <h3>📋 Detalles del Envío</h3>
+            <table class="details-table">
+                <tr>
+                    <th>Tipo de Envío</th>
+                    <td>{{tipoEnvio}}</td>
+                </tr>
+                <tr>
+                    <th>Peso</th>
+                    <td>{{peso}} kg</td>
+                </tr>
+                <tr>
+                    <th>Volumen</th>
+                    <td>{{volumen}} m³</td>
+                </tr>
+                <tr>
+                    <th>Vehículo Recomendado</th>
+                    <td>{{tipoVehiculo}}</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="details-section">
+            <h3>💰 Desglose de Costos</h3>
+            <table class="costs-table">
+                <tr>
+                    <th>Concepto</th>
+                    <th>Importe</th>
+                </tr>
+                <tr>
+                    <td>Flete</td>
+                    <td>${{flete}}</td>
+                </tr>
+                <tr>
+                    <td>Protección de Encomienda</td>
+                    <td>${{proteccionEncomienda}}</td>
+                </tr>
+                <tr>
+                    <td>Total Peajes</td>
+                    <td>${{totalPeaje}}</td>
+                </tr>
+                {{#if costoHospedaje}}
+                <tr>
+                    <td>Costo de Hospedaje</td>
+                    <td>${{costoHospedaje}}</td>
+                </tr>
+                {{/if}}
+                <tr>
+                    <td>Subtotal</td>
+                    <td>${{subtotal}}</td>
+                </tr>
+                <tr>
+                    <td>IVA (16%)</td>
+                    <td>${{iva}}</td>
+                </tr>
+                <tr>
+                    <td>Franqueo Postal</td>
+                    <td>${{franqueoPostal}}</td>
+                </tr>
+                <tr class="total-row">
+                    <td><strong>TOTAL ESTIMADO</strong></td>
+                    <td><strong>${{totalAPagar}}</strong></td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="validity-notice">
+            <h4>⏰ Validez de la Cotización</h4>
+            <p><strong>Esta cotización tiene una validez de 7 días.</strong> Los precios pueden variar según las condiciones del mercado y disponibilidad.</p>
+        </div>
+        
+        <p><strong>Siguientes pasos:</strong></p>
+        <ul>
+            <li>Si deseas proceder, puedes crear tu orden de envío</li>
+            <li>La cotización será válida por 7 días</li>
+            <li>Contáctanos si tienes alguna pregunta</li>
+        </ul>
+        
+        <div class="footer">
+            <p>Gracias por considerar nuestro servicio de envíos</p>
+            <p><small>Este es un email automático, por favor no respondas a este mensaje.</small></p>
+        </div>
+    </div>
+</body>
+</html>

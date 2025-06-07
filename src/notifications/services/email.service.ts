@@ -32,7 +32,7 @@ export class EmailService {
       service: "gmail",// ← Usar servicio Gmail directamente
       auth: {
         user: "mcljs15@gmail.com", // ← Tu email
-        pass: "",// ← Tu contraseña de aplicación
+        pass: "ndcnvjmwprwlueuy",// ← Tu contraseña de aplicación
       },
     });
 

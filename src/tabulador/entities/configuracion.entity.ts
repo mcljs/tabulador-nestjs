@@ -11,7 +11,7 @@ export class Configuracion {
   @Column({ type: 'float', default: 0.49 })
   costoGasolina: number;
 
-  @Column({ type: 'float', default: 0.035 }) 
+  @Column({ type: 'float', default: 0.035 })
   porcentajeProteccion: number;
 
   @Column({ type: 'float', default: 5.0 })
@@ -40,29 +40,29 @@ export class Configuracion {
 
   @Column({ type: 'float', default: 0.25 })
   consumoCanterCavaLarga: number;
-  
+
   // Costos de peaje por tipo de vehículo
   @Column({ type: 'float', default: 0.8 })
   costoPeajeSusuki: number;
-  
+
   @Column({ type: 'float', default: 0.8 })
   costoPeajeL300: number;
-  
+
   @Column({ type: 'float', default: 1.2 })
   costoPeajeNHR: number;
-  
+
   @Column({ type: 'float', default: 1.2 })
   costoPeajeCanterCorta: number;
-  
+
   @Column({ type: 'float', default: 1.2 })
   costoPeajeCanterLarga: number;
-  
+
   @Column({ type: 'float', default: 1.2 })
   costoPeajePlatforma: number;
-  
+
   @Column({ type: 'float', default: 1.2 })
   costoPeajePitman: number;
-  
+
   @Column({ type: 'float', default: 6.0 })
   costoPeajeChuto: number;
 

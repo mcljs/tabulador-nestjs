@@ -57,31 +57,31 @@ export class CreateConfiguracionDto {
   @IsNumber()
   @IsOptional()
   costoPeajeSusuki?: number;
-  
+
   @IsNumber()
   @IsOptional()
   costoPeajeL300?: number;
-  
+
   @IsNumber()
   @IsOptional()
   costoPeajeNHR?: number;
-  
+
   @IsNumber()
   @IsOptional()
   costoPeajeCanterCorta?: number;
-  
+
   @IsNumber()
   @IsOptional()
   costoPeajeCanterLarga?: number;
-  
+
   @IsNumber()
   @IsOptional()
   costoPeajePlatforma?: number;
-  
+
   @IsNumber()
   @IsOptional()
   costoPeajePitman?: number;
-  
+
   @IsNumber()
   @IsOptional()
   costoPeajeChuto?: number;

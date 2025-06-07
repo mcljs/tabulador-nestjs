@@ -9,6 +9,7 @@ import {
 } from '../dto/create-envio.dto';
 import { UsersService } from 'src/users/services/users.service';
 import { ConfiguracionService } from './configuracion.service';
+import { NotificationService } from '../../notifications/services/notification.service';
 
 @Injectable()
 export class TabuladorService {
@@ -17,6 +18,7 @@ export class TabuladorService {
     @InjectRepository(EnvioEntity)
     private readonly envioRepository: Repository<EnvioEntity>,
     private readonly usersService: UsersService,
+    private readonly notificationService: NotificationService,
   ) {}
 
   /**
@@ -32,19 +34,21 @@ export class TabuladorService {
   private determinarTipoVehiculo(peso: number, volumen: number): string {
     // Primero selección por volumen
     let tipoVehiculo: string;
-    
+
     if (volumen <= 2.25) {
       tipoVehiculo = 'SUSUKI_EECO'; // Capacidad 2.25 m3
     } else if (volumen <= 3.3) {
       tipoVehiculo = 'MITSUBISHI_L300'; // Capacidad 3.3 m3
-    } else if (volumen <= 5) { // Asumiendo capacidad de NHR
+    } else if (volumen <= 5) {
+      // Asumiendo capacidad de NHR
       tipoVehiculo = 'NHR';
-    } else if (volumen <= 8) { // Asumiendo capacidad de Canter Cava Corta
+    } else if (volumen <= 8) {
+      // Asumiendo capacidad de Canter Cava Corta
       tipoVehiculo = 'CANTER_CAVA_CORTA';
     } else {
       tipoVehiculo = 'CANTER_CAVA_LARGA';
     }
-    
+
     // Ahora verificamos si el vehículo seleccionado por volumen también cumple con la capacidad de peso
     if (tipoVehiculo === 'SUSUKI_EECO' && peso > 450) {
       // El vehículo seleccionado por volumen no cumple con el peso requerido
@@ -75,7 +79,7 @@ export class TabuladorService {
     } else if (tipoVehiculo === 'CANTER_CAVA_CORTA' && peso > 3500) {
       tipoVehiculo = 'CANTER_CAVA_LARGA';
     }
-    
+
     return tipoVehiculo;
   }
 
@@ -105,78 +109,89 @@ export class TabuladorService {
     }
   }
 
-/**
- * Obtiene el costo de peaje según la distancia y el tipo de vehículo
- */
-private obtenerCostoPeaje(
-  distancia: number, 
-  tipoVehiculo: string, 
-  tipoEnvio: string, // Añadir tipo de envío como parámetro
-  config: any
-): { cantidadPeajes: number, costoPeaje: number, totalPeaje: number } {
-  let cantidadPeajes = 0;
-  
-  // Determinamos la cantidad de peajes según la distancia
-  if (distancia <= 100) {
-    cantidadPeajes = 1;
-  } else if (distancia <= 250) {
-    cantidadPeajes = 2;
-  } else if (distancia <= 600) {
-    cantidadPeajes = 6;
-  } else {
-    cantidadPeajes = 8;
-  }
-  
-  // Para envíos EXPRESS, consideramos ida y vuelta en los peajes
-  if (tipoEnvio === 'EXPRESS') {
-    cantidadPeajes = cantidadPeajes * 2;
-  }
-  
-  // Obtenemos el costo unitario del peaje según el tipo de vehículo
-  const costoPeajeUnitario = this.obtenerCostoVehiculoPeaje(tipoVehiculo, config);
-  
-  // Calculamos el costo total de peajes
-  const totalPeaje = costoPeajeUnitario * cantidadPeajes;
-  
-  return { 
-    cantidadPeajes, 
-    costoPeaje: costoPeajeUnitario,
-    totalPeaje
-  };
-}
+  /**
+   * Obtiene el costo de peaje según la distancia y el tipo de vehículo
+   */
+  private obtenerCostoPeaje(
+    distancia: number,
+    tipoVehiculo: string,
+    tipoEnvio: string, // Añadir tipo de envío como parámetro
+    config: any,
+  ): { cantidadPeajes: number; costoPeaje: number; totalPeaje: number } {
+    let cantidadPeajes = 0;
 
-/**
- * Calcula el factor_K basado en la distancia
- */
-private calcularFactorK(distancia: number, tipoEnvio: string, tipoVehiculo: string, config: any): number {
-  // Para envío normal, se calcula con el factor de distancia
-  if (tipoEnvio !== 'EXPRESS') {
-    let factorDistancia = 0;
-    
+    // Determinamos la cantidad de peajes según la distancia
     if (distancia <= 100) {
-      factorDistancia = 0.045; // Factor 0.045 hasta 100 KM
+      cantidadPeajes = 1;
     } else if (distancia <= 250) {
-      factorDistancia = 0.04; // Factor 0.04 hasta 250 KM
+      cantidadPeajes = 2;
     } else if (distancia <= 600) {
-      factorDistancia = 0.03; // Factor 0.03 hasta 600 KM
+      cantidadPeajes = 6;
     } else {
-      factorDistancia = 0.02; // Factor 0.02 desde 600 KM en adelante
+      cantidadPeajes = 8;
     }
-    
-    return distancia * factorDistancia;
-  } 
-  // Para envío EXPRESS, se calcula con ida y vuelta y consumo de combustible
-  else {
-    // Se considera ida y vuelta (distancia * 2)
-    const kmTotal = distancia * 2;
-    
-    // Se multiplica por el consumo de combustible del vehículo
-    const consumoCombustible = this.obtenerConsumoCombustible(tipoVehiculo, config);
-    
-    // Se calcula el costo del combustible: km * consumo * precio
-    return kmTotal * consumoCombustible * config.costoGasolina;
+
+    // Para envíos EXPRESS, consideramos ida y vuelta en los peajes
+    if (tipoEnvio === 'EXPRESS') {
+      cantidadPeajes = cantidadPeajes * 2;
+    }
+
+    // Obtenemos el costo unitario del peaje según el tipo de vehículo
+    const costoPeajeUnitario = this.obtenerCostoVehiculoPeaje(
+      tipoVehiculo,
+      config,
+    );
+
+    // Calculamos el costo total de peajes
+    const totalPeaje = costoPeajeUnitario * cantidadPeajes;
+
+    return {
+      cantidadPeajes,
+      costoPeaje: costoPeajeUnitario,
+      totalPeaje,
+    };
   }
-}
+
+  /**
+   * Calcula el factor_K basado en la distancia
+   */
+  private calcularFactorK(
+    distancia: number,
+    tipoEnvio: string,
+    tipoVehiculo: string,
+    config: any,
+  ): number {
+    // Para envío normal, se calcula con el factor de distancia
+    if (tipoEnvio !== 'EXPRESS') {
+      let factorDistancia = 0;
+
+      if (distancia <= 100) {
+        factorDistancia = 0.045; // Factor 0.045 hasta 100 KM
+      } else if (distancia <= 250) {
+        factorDistancia = 0.04; // Factor 0.04 hasta 250 KM
+      } else if (distancia <= 600) {
+        factorDistancia = 0.03; // Factor 0.03 hasta 600 KM
+      } else {
+        factorDistancia = 0.02; // Factor 0.02 desde 600 KM en adelante
+      }
+
+      return distancia * factorDistancia;
+    }
+    // Para envío EXPRESS, se calcula con ida y vuelta y consumo de combustible
+    else {
+      // Se considera ida y vuelta (distancia * 2)
+      const kmTotal = distancia * 2;
+
+      // Se multiplica por el consumo de combustible del vehículo
+      const consumoCombustible = this.obtenerConsumoCombustible(
+        tipoVehiculo,
+        config,
+      );
+
+      // Se calcula el costo del combustible: km * consumo * precio
+      return kmTotal * consumoCombustible * config.costoGasolina;
+    }
+  }
 
   /**
    * Obtiene el consumo de combustible según el tipo de vehículo
@@ -197,181 +212,163 @@ private calcularFactorK(distancia: number, tipoEnvio: string, tipoVehiculo: stri
     }
   }
 
-/**
- * Calcula el factor_P basado en el algoritmo mostrado en el Excel
- */
-private calcularFactorP(peso: number, distancia: number, config: any): number {
-  let constP1 = 0;
-  let constP2 = 0;
-  let factorP = 0;
-  
-  // Asignar valores de constantes según la distancia
-  if (distancia <= 100) {
-    // Para hasta 100 km: P1 = 2, P2 = 0.05, rango 1-2 (se resta)
-    constP1 = config.constP1Hasta100Km || 2;
-    constP2 = config.constP2Hasta100Km || 0.05;
-    
-    // Cálculo: P1 - (peso * P2)
-    factorP = constP1 - (peso * constP2);
-    
-    // Aplicar límites: min = 1, max = 2
-    factorP = Math.max(1, Math.min(factorP, 2));
-    
-  } else if (distancia <= 250) {
-    // Para hasta 250 km: P1 = 1.5, P2 = 0.05, rango 0.9-1.5 (se resta)
-    constP1 = config.constP1Hasta250Km || 1.5;
-    constP2 = config.constP2Hasta250Km || 0.05;
-    
-    // Cálculo: P1 - (peso * P2)
-    factorP = constP1 - (peso * constP2);
-    
-    // Aplicar límites: min = 0.9, max = 1.5
-    factorP = Math.max(0.9, Math.min(factorP, 1.5));
-    
-  } else if (distancia <= 600) {
-    // Para hasta 600 km: P1 = 0.5, P2 = 0.03, rango 0.5-1.5 (se suma)
-    constP1 = config.constP1Hasta600Km || 0.5;
-    constP2 = config.constP2Hasta600Km || 0.03;
-    
-    // Cálculo: P1 + (peso * P2)
-    factorP = constP1 + (peso * constP2);
-    
-    // Aplicar límites: min = 0.5, max = 1.5
-    factorP = Math.max(0.5, Math.min(factorP, 1.5));
-    
-  } else {
-    // Para desde 600 km en adelante: P1 = 0.5, P2 = 0.06, rango 0.5-1.5 (se suma)
-    constP1 = config.constP1Desde600Km || 0.5;
-    constP2 = config.constP2Desde600Km || 0.06;
-    
-    // Cálculo: P1 + (peso * P2)
-    factorP = constP1 + (peso * constP2);
-    
-    // Aplicar límites: min = 0.5, max = 1.5
-    factorP = Math.max(0.5, Math.min(factorP, 1.5));
+  /**
+   * Calcula el factor_P basado en el algoritmo mostrado en el Excel
+   */
+  private calcularFactorP(
+    peso: number,
+    distancia: number,
+    config: any,
+  ): number {
+    let constP1 = 0;
+    let constP2 = 0;
+    let factorP = 0;
+
+    // Asignar valores de constantes según la distancia
+    if (distancia <= 100) {
+      // Para hasta 100 km: P1 = 2, P2 = 0.05, rango 1-2 (se resta)
+      constP1 = config.constP1Hasta100Km || 2;
+      constP2 = config.constP2Hasta100Km || 0.05;
+
+      // Cálculo: P1 - (peso * P2)
+      factorP = constP1 - peso * constP2;
+
+      // Aplicar límites: min = 1, max = 2
+      factorP = Math.max(1, Math.min(factorP, 2));
+    } else if (distancia <= 250) {
+      // Para hasta 250 km: P1 = 1.5, P2 = 0.05, rango 0.9-1.5 (se resta)
+      constP1 = config.constP1Hasta250Km || 1.5;
+      constP2 = config.constP2Hasta250Km || 0.05;
+
+      // Cálculo: P1 - (peso * P2)
+      factorP = constP1 - peso * constP2;
+
+      // Aplicar límites: min = 0.9, max = 1.5
+      factorP = Math.max(0.9, Math.min(factorP, 1.5));
+    } else if (distancia <= 600) {
+      // Para hasta 600 km: P1 = 0.5, P2 = 0.03, rango 0.5-1.5 (se suma)
+      constP1 = config.constP1Hasta600Km || 0.5;
+      constP2 = config.constP2Hasta600Km || 0.03;
+
+      // Cálculo: P1 + (peso * P2)
+      factorP = constP1 + peso * constP2;
+
+      // Aplicar límites: min = 0.5, max = 1.5
+      factorP = Math.max(0.5, Math.min(factorP, 1.5));
+    } else {
+      // Para desde 600 km en adelante: P1 = 0.5, P2 = 0.06, rango 0.5-1.5 (se suma)
+      constP1 = config.constP1Desde600Km || 0.5;
+      constP2 = config.constP2Desde600Km || 0.06;
+
+      // Cálculo: P1 + (peso * P2)
+      factorP = constP1 + peso * constP2;
+
+      // Aplicar límites: min = 0.5, max = 1.5
+      factorP = Math.max(0.5, Math.min(factorP, 1.5));
+    }
+
+    return factorP;
   }
-  
-  return factorP;
-}
 
   /**
    * Calcula el costo del envío basado en la nueva fórmula
    */
-private async calcular_costo_envio(
-  distancia: number,
-  peso: number,
-  tipoArticulo: string,
-  tipoEnvio: string,
-  esSobre: boolean,
-  valorDeclarado: number,
-  ancho?: number,
-  alto?: number, 
-  largo?: number,
-): Promise<{ 
-  flete: number; 
-  tipoVehiculo: string; 
-  costoHospedaje: number; 
-  volumen: number;
-  cantidadPeajes: number;
-  costoPeaje: number;
-  totalPeaje: number;
-  proteccionEncomienda: number;
-  subtotal: number;
-  iva: number;
-  franqueoPostal: number;
-  totalAPagar: number;
-}> {
-  const config = await this.configuracionService.obtenerOCrearConfiguracion();
-  
-  // Calcular volumen si es un paquete (no es sobre)
-  let volumen = 0;
-  if (!esSobre && ancho && alto && largo) {
-    volumen = this.calcularVolumen(ancho, alto, largo);
-  }
-  
-  // Determinar tipo de vehículo adecuado
-  const tipoVehiculo = this.determinarTipoVehiculo(peso, volumen);
-  
-  // Obtener información de peaje según distancia y tipo de vehículo
-const { cantidadPeajes, costoPeaje, totalPeaje } = this.obtenerCostoPeaje(
-  distancia, 
-  tipoVehiculo,
-  tipoEnvio, // Añadir tipo de envío
-  config
-);
-  
-  // Calcular factor_P - factor por peso
-  const factorP = this.calcularFactorP(peso, distancia, config);
-  
-  // Calcular factor_K - factor por distancia
-  const factorK = this.calcularFactorK(distancia, tipoEnvio, tipoVehiculo, config);
-  
-  // Calcular costo por peso
-  const costoPorPeso = peso * factorP;
-  
-  // Calcular protección de encomienda (3.5% del valor declarado)
-  const porcentajeProteccion = config.porcentajeProteccion || 3.5; // Por defecto 3.5%
-  let proteccionEncomienda = valorDeclarado * (porcentajeProteccion / 100); // Convertir a decimal para el cálculo
-  proteccionEncomienda = Math.max(proteccionEncomienda, config.proteccionMinima || 5.0);
-  
-  // Calcular hospedaje si aplica
-  let costoHospedaje = 0;
-  if (distancia > 400 &&
-     (tipoEnvio === 'EXPRESS' || config.aplicableHospedaje === 'TODOS')) {
-    costoHospedaje = config.costoHospedaje;
-  }
-  
-  // Calcular subtotal1 SIN incluir la protección
-  const subtotal1 = totalPeaje + costoPorPeso + factorK;
-  
-  // Calcular el flete sin incluir la protección
-  const flete = subtotal1 / 1.3;
-  
-  // Calcular subtotal (flete + protección + hospedaje)
-  const subtotal = flete + proteccionEncomienda + costoHospedaje;
-  
-  // IVA: subtotal * 0.16
-  const iva = subtotal * 0.16;
-  
-  // Franqueo postal (valor de configuración)
-  const franqueoPostal = config.franqueoPostal || 2.0;
-  
-  // TOTAL: subtotal + iva + franqueoPostal
-  const totalAPagar = subtotal + iva + franqueoPostal;
-  
-  return { 
-    flete, 
-    tipoVehiculo,
-    costoHospedaje,
-    volumen,
-    cantidadPeajes,
-    costoPeaje,
-    totalPeaje,
-    proteccionEncomienda,
-    subtotal,
-    iva,
-    franqueoPostal,
-    totalAPagar
-  };
-}
+  private async calcular_costo_envio(
+    distancia: number,
+    peso: number,
+    tipoArticulo: string,
+    tipoEnvio: string,
+    esSobre: boolean,
+    valorDeclarado: number,
+    ancho?: number,
+    alto?: number,
+    largo?: number,
+  ): Promise<{
+    flete: number;
+    tipoVehiculo: string;
+    costoHospedaje: number;
+    volumen: number;
+    cantidadPeajes: number;
+    costoPeaje: number;
+    totalPeaje: number;
+    proteccionEncomienda: number;
+    subtotal: number;
+    iva: number;
+    franqueoPostal: number;
+    totalAPagar: number;
+  }> {
+    const config = await this.configuracionService.obtenerOCrearConfiguracion();
 
-  async create(createEnvioDto: CreateEnvioDto): Promise<EnvioEntity> {
-    const { 
-      distancia, 
-      peso = 0, 
-      tipoArticulo, 
-      tipoEnvio, 
-      esSobre, 
-      ancho, 
-      alto, 
-      largo,
-      valorDeclarado 
-    } = createEnvioDto;
-    
-    const { 
-      flete, 
-      tipoVehiculo, 
-      costoHospedaje, 
+    // Calcular volumen si es un paquete (no es sobre)
+    let volumen = 0;
+    if (!esSobre && ancho && alto && largo) {
+      volumen = this.calcularVolumen(ancho, alto, largo);
+    }
+
+    // Determinar tipo de vehículo adecuado
+    const tipoVehiculo = this.determinarTipoVehiculo(peso, volumen);
+
+    // Obtener información de peaje según distancia y tipo de vehículo
+    const { cantidadPeajes, costoPeaje, totalPeaje } = this.obtenerCostoPeaje(
+      distancia,
+      tipoVehiculo,
+      tipoEnvio, // Añadir tipo de envío
+      config,
+    );
+
+    // Calcular factor_P - factor por peso
+    const factorP = this.calcularFactorP(peso, distancia, config);
+
+    // Calcular factor_K - factor por distancia
+    const factorK = this.calcularFactorK(
+      distancia,
+      tipoEnvio,
+      tipoVehiculo,
+      config,
+    );
+
+    // Calcular costo por peso
+    const costoPorPeso = peso * factorP;
+
+    // Calcular protección de encomienda (3.5% del valor declarado)
+    const porcentajeProteccion = config.porcentajeProteccion || 3.5; // Por defecto 3.5%
+    let proteccionEncomienda = valorDeclarado * (porcentajeProteccion / 100); // Convertir a decimal para el cálculo
+    proteccionEncomienda = Math.max(
+      proteccionEncomienda,
+      config.proteccionMinima || 5.0,
+    );
+
+    // Calcular hospedaje si aplica
+    let costoHospedaje = 0;
+    if (
+      distancia > 400 &&
+      (tipoEnvio === 'EXPRESS' || config.aplicableHospedaje === 'TODOS')
+    ) {
+      costoHospedaje = config.costoHospedaje;
+    }
+
+    // Calcular subtotal1 SIN incluir la protección
+    const subtotal1 = totalPeaje + costoPorPeso + factorK;
+
+    // Calcular el flete sin incluir la protección
+    const flete = subtotal1 / 1.3;
+
+    // Calcular subtotal (flete + protección + hospedaje)
+    const subtotal = flete + proteccionEncomienda + costoHospedaje;
+
+    // IVA: subtotal * 0.16
+    const iva = subtotal * 0.16;
+
+    // Franqueo postal (valor de configuración)
+    const franqueoPostal = config.franqueoPostal || 2.0;
+
+    // TOTAL: subtotal + iva + franqueoPostal
+    const totalAPagar = subtotal + iva + franqueoPostal;
+
+    return {
+      flete,
+      tipoVehiculo,
+      costoHospedaje,
       volumen,
       cantidadPeajes,
       costoPeaje,
@@ -380,7 +377,36 @@ const { cantidadPeajes, costoPeaje, totalPeaje } = this.obtenerCostoPeaje(
       subtotal,
       iva,
       franqueoPostal,
-      totalAPagar
+      totalAPagar,
+    };
+  }
+
+  async create(createEnvioDto: CreateEnvioDto): Promise<EnvioEntity> {
+    const {
+      distancia,
+      peso = 0,
+      tipoArticulo,
+      tipoEnvio,
+      esSobre,
+      ancho,
+      alto,
+      largo,
+      valorDeclarado,
+    } = createEnvioDto;
+
+    const {
+      flete,
+      tipoVehiculo,
+      costoHospedaje,
+      volumen,
+      cantidadPeajes,
+      costoPeaje,
+      totalPeaje,
+      proteccionEncomienda,
+      subtotal,
+      iva,
+      franqueoPostal,
+      totalAPagar,
     } = await this.calcular_costo_envio(
       distancia,
       peso,
@@ -390,9 +416,9 @@ const { cantidadPeajes, costoPeaje, totalPeaje } = this.obtenerCostoPeaje(
       valorDeclarado,
       ancho,
       alto,
-      largo
+      largo,
     );
-  
+
     const nuevoEnvio = this.envioRepository.create({
       ...createEnvioDto,
       volumen,
@@ -406,14 +432,20 @@ const { cantidadPeajes, costoPeaje, totalPeaje } = this.obtenerCostoPeaje(
       totalAPagar,
       cantidadPeajes,
       costoPeaje,
-      totalPeaje
+      totalPeaje,
     });
-  
+
     return this.envioRepository.save(nuevoEnvio);
   }
 
   async findAll(queryParams: any): Promise<[EnvioEntity[], number]> {
-    const { page = 1, limit = 20, trackingNumber, status, tipoEnvio } = queryParams;
+    const {
+      page = 1,
+      limit = 20,
+      trackingNumber,
+      status,
+      tipoEnvio,
+    } = queryParams;
     const queryBuilder = this.envioRepository.createQueryBuilder('envio');
 
     if (trackingNumber) {
@@ -425,7 +457,7 @@ const { cantidadPeajes, costoPeaje, totalPeaje } = this.obtenerCostoPeaje(
     if (status) {
       queryBuilder.andWhere('envio.status = :status', { status });
     }
-    
+
     if (tipoEnvio) {
       queryBuilder.andWhere('envio.tipoEnvio = :tipoEnvio', { tipoEnvio });
     }
@@ -466,22 +498,22 @@ const { cantidadPeajes, costoPeaje, totalPeaje } = this.obtenerCostoPeaje(
   }
 
   async calcularEnvio(calculaterDto: CalculaterDto): Promise<EnvioEntity> {
-    const { 
-      distancia, 
-      peso = 0, 
-      tipoArticulo, 
-      tipoEnvio, 
-      esSobre, 
-      ancho, 
-      alto, 
+    const {
+      distancia,
+      peso = 0,
+      tipoArticulo,
+      tipoEnvio,
+      esSobre,
+      ancho,
+      alto,
       largo,
-      valorDeclarado 
+      valorDeclarado,
     } = calculaterDto;
 
-    const { 
-      flete, 
-      tipoVehiculo, 
-      costoHospedaje, 
+    const {
+      flete,
+      tipoVehiculo,
+      costoHospedaje,
       volumen,
       cantidadPeajes,
       costoPeaje,
@@ -490,7 +522,7 @@ const { cantidadPeajes, costoPeaje, totalPeaje } = this.obtenerCostoPeaje(
       subtotal,
       iva,
       franqueoPostal,
-      totalAPagar
+      totalAPagar,
     } = await this.calcular_costo_envio(
       distancia,
       peso,
@@ -500,7 +532,7 @@ const { cantidadPeajes, costoPeaje, totalPeaje } = this.obtenerCostoPeaje(
       valorDeclarado,
       ancho,
       alto,
-      largo
+      largo,
     );
 
     const nuevoEnvio = this.envioRepository.create({
@@ -516,7 +548,7 @@ const { cantidadPeajes, costoPeaje, totalPeaje } = this.obtenerCostoPeaje(
       totalAPagar,
       cantidadPeajes,
       costoPeaje,
-      totalPeaje
+      totalPeaje,
     });
 
     return nuevoEnvio;
@@ -531,27 +563,90 @@ const { cantidadPeajes, costoPeaje, totalPeaje } = this.obtenerCostoPeaje(
     if (!user) {
       throw new NotFoundException(`User with ID "${id}" not found`);
     }
-    
+
     // Primero verificamos si es un sobre (peso <= 1kg)
     if (createEnvioDto.peso && createEnvioDto.peso <= 1) {
       createEnvioDto.esSobre = true;
     }
-    
+
     const envio = await this.calcularEnvio(createEnvioDto as any);
-    
+
     envio.trackingNumber = 'ENV' + Date.now();
     envio.status = 'Por Confirmar';
     envio.user = user;
-    return this.envioRepository.save(envio);
+    const envioGuardado = await this.envioRepository.save(envio);
+
+    try {
+      await this.notificationService.notificarNuevoEnvio({
+        user,
+        envio: envioGuardado,
+      });
+      console.log(`📧 Notificación de nuevo envío enviada a ${user.email}`);
+    } catch (error) {
+      console.error('❌ Error al enviar notificación de nuevo envío:', error);
+    }
+
+    return envioGuardado;
   }
 
   async actualizarEstadoOrden(
     id: number,
     updateEnvioDto: UpdateEnvioDto,
   ): Promise<EnvioEntity> {
-    await this.envioRepository.update(id, updateEnvioDto);
+    const envioActual = await this.findOne(id);
+    if (!envioActual) {
+      throw new NotFoundException(`Envío con ID "${id}" no encontrado`);
+    }
 
-    return this.findOne(id);
+    const estadoAnterior = envioActual.status;
+
+    await this.envioRepository.update(id, updateEnvioDto);
+    const envioActualizado = await this.findOne(id);
+    if (updateEnvioDto.status && estadoAnterior !== updateEnvioDto.status) {
+      try {
+        await this.notificationService.notificarCambioEstado(
+          {
+            user: envioActualizado.user,
+            envio: envioActualizado,
+          },
+          estadoAnterior,
+        );
+
+        switch (updateEnvioDto.status) {
+          case 'Confirmado':
+            await this.notificationService.notificarEnvioEnTransito({
+              user: envioActualizado.user,
+              envio: envioActualizado,
+            });
+            console.log(
+              `🚛 Notificación de confirmación/tránsito enviada a ${envioActualizado.user.email}`,
+            );
+            break;
+
+          case 'Entregado':
+            await this.notificationService.notificarEnvioEntregado({
+              user: envioActualizado.user,
+              envio: envioActualizado,
+            });
+            console.log(
+              `✅ Notificación de entrega enviada a ${envioActualizado.user.email}`,
+            );
+            break;
+
+          default:
+            console.log(
+              `📧 Notificación de cambio de estado enviada: ${estadoAnterior} → ${updateEnvioDto.status}`,
+            );
+        }
+      } catch (error) {
+        console.error(
+          '❌ Error al enviar notificación de cambio de estado:',
+          error,
+        );
+      }
+    }
+
+    return envioActualizado;
   }
 
   async findTabuladorWithRelation(id: number): Promise<EnvioEntity> {

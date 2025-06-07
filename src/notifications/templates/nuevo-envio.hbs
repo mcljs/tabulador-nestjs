@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Envío Creado</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            margin: -20px -20px 20px -20px;
+        }
+        .tracking-number {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .details-table th, .details-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .details-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .total {
+            background-color: #28a745;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚚 Nuevo Envío Creado</h1>
+        </div>
+        
+        <p>Hola <strong>{{nombreUsuario}}</strong>,</p>
+        
+        <p>Tu nuevo envío ha sido creado exitosamente en nuestro sistema. A continuación encontrarás los detalles:</p>
+        
+        <div class="tracking-number">
+            📦 Número de Seguimiento: {{trackingNumber}}
+        </div>
+        
+        <table class="details-table">
+            <tr>
+                <th>Tipo de Envío</th>
+                <td>{{tipoEnvio}}</td>
+            </tr>
+            <tr>
+                <th>Origen</th>
+                <td>{{origen}}</td>
+            </tr>
+            <tr>
+                <th>Destino</th>
+                <td>{{destino}}</td>
+            </tr>
+            <tr>
+                <th>Peso</th>
+                <td>{{peso}} kg</td>
+            </tr>
+            <tr>
+                <th>Fecha de Creación</th>
+                <td>{{fechaCreacion}}</td>
+            </tr>
+            <tr class="total">
+                <th>Total a Pagar</th>
+                <td>${{totalAPagar}}</td>
+            </tr>
+        </table>
+        
+        <p><strong>Estado actual:</strong> Por Confirmar</p>
+        
+        <p>Recibirás actualizaciones por email sobre el progreso de tu envío.</p>
+        
+        <div class="footer">
+            <p>Gracias por confiar en nuestro servicio de envíos</p>
+            <p><small>Este es un email automático, por favor no respondas a este mensaje.</small></p>
+        </div>
+    </div>
+</body>
+</html>

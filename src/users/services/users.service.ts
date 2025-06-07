@@ -119,10 +119,31 @@ export class UsersService {
     body: UserUpdateDTO,
   ): Promise<UpdateResult | null> {
     try {
+      // 1. VALIDAR que el usuario existe
+      const user = await this.findUserByID(id);
+      if (!user) {
+        throw new ErrorManager({
+          type: 'NOT_FOUND',
+          message: 'User not found',
+        });
+      }
+
+      // 2. CLAVE: Remover el ID del body si existe
+      const { id: bodyId, ...updateData } = body as any;
+
+      // 3. Si se actualiza la contraseña, hashearla
+      if (updateData.password) {
+        updateData.password = await bcrypt.hash(
+          updateData.password,
+          Number(process.env.HASH_SALT || '10'),
+        );
+      }
+
       const userUpdate: UpdateResult = await this.userRepository.update(
         id,
-        body,
+        updateData,
       );
+
       if (userUpdate.affected === 0) {
         throw new ErrorManager({
           type: 'BAD_REQUEST',

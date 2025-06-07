@@ -102,15 +102,15 @@ export class CreateEnvioDto {
   @IsNumber()
   @Min(0)
   costoHospedaje?: number;
-  
+
   @IsOptional()
   @IsNumber()
   cantidadPeajes?: number;
-  
+
   @IsOptional()
   @IsNumber()
   costoPeaje?: number;
-  
+
   @IsOptional()
   @IsNumber()
   totalPeaje?: number;
