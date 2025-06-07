@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { DataSourceConfig } from './config/data.source';
 import { AuthModule } from './auth/auth.module';
 import { TabuladorModule } from './tabulador/tabulador.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { TabuladorModule } from './tabulador/tabulador.module';
     UsersModule,
     TabuladorModule,
     AuthModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}
