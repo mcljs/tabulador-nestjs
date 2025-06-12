@@ -31,8 +31,8 @@ export class EmailService {
     this.transporter = nodemailer.createTransport({
       service: "gmail",// ← Usar servicio Gmail directamente
       auth: {
-        user: "mcljs15@gmail.com", // ← Tu email
-        pass: "",// ← Tu contraseña de aplicación
+        user: "systemsghalmacah@gmail.com", // ← Tu email
+        pass: "amznvzogzflxtowz",// ← Tu contraseña de aplicación
       },
     });
 
