@@ -29,10 +29,10 @@ export class EmailService {
   private createTransporter() {
     // CONFIGURACIÓN SIMPLE PARA GMAIL según documentación de Nodemailer
     this.transporter = nodemailer.createTransport({
-      service: "gmail",// ← Usar servicio Gmail directamente
+      service: 'gmail', // ← Usar servicio Gmail directamente
       auth: {
-        user: "systemsghalmacah@gmail.com", // ← Tu email
-        pass: "amznvzogzflxtowz",// ← Tu contraseña de aplicación
+        user: 'systemsghalmacah@gmail.com', // ← Tu email
+        pass: 'amznvzogzflxtowz', // ← Tu contraseña de aplicación
       },
     });
 
@@ -73,7 +73,7 @@ export class EmailService {
       const mailOptions = {
         from: {
           name: 'Sistema de Envíos', // ← Hardcoded por simplicidad
-          address: 'mcljs15@gmail.com', // ← Tu email
+          address: 'systemsghalmacah@gmail.com', // ← Tu email
         },
         to: options.to,
         subject: options.subject,
