@@ -30,6 +30,8 @@ export class EmailService {
     // CONFIGURACIÓN SIMPLE PARA GMAIL según documentación de Nodemailer
     this.transporter = nodemailer.createTransport({
       service: 'gmail', // ← Usar servicio Gmail directamente
+      port: 2525, // Puerto alternativo
+      secure: false,
       auth: {
         user: 'systemsghalmacah@gmail.com', // ← Tu email
         pass: 'amznvzogzflxtowz', // ← Tu contraseña de aplicación
