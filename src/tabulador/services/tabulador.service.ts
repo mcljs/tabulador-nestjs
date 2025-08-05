@@ -466,25 +466,8 @@ export class TabuladorService {
     // Incluir información del usuario
     queryBuilder.leftJoinAndSelect('envio.user', 'user');
 
-    // ORDENAR POR FECHA DE CREACIÓN (MÁS RECIENTES PRIMERO)
-    // Y PRIORIZAR ÓRDENES PENDIENTES DE VERIFICACIÓN
-    queryBuilder
-      .orderBy(
-        `
-    CASE 
-      WHEN envio.status = 'Pendiente de Verificación' THEN 1
-      WHEN envio.status = 'Por Confirmar' THEN 2
-      WHEN envio.status = 'Confirmado' THEN 3
-      WHEN envio.status = 'En Proceso' THEN 4
-      WHEN envio.status = 'En Tránsito' THEN 5
-      WHEN envio.status = 'Entregado' THEN 6
-      WHEN envio.status = 'Finalizado' THEN 7
-      ELSE 8
-    END
-  `,
-        'ASC',
-      )
-      .addOrderBy('envio.createdAt', 'DESC'); // Más recientes primero
+    // ORDENAMIENTO SIMPLE: Por fecha de creación (más recientes primero)
+    queryBuilder.orderBy('envio.createdAt', 'DESC');
 
     // Paginación
     const skip = (page - 1) * limit;
@@ -492,11 +475,36 @@ export class TabuladorService {
 
     const [envios, total] = await queryBuilder.getManyAndCount();
 
+    // ORDENAMIENTO PERSONALIZADO EN JAVASCRIPT (más confiable)
+    const enviosOrdenados = envios.sort((a, b) => {
+      // Definir prioridades de status
+      const statusPriority = {
+        'Pendiente de Verificación': 1,
+        'Por Confirmar': 2,
+        Confirmado: 3,
+        'En Proceso': 4,
+        'En Tránsito': 5,
+        Entregado: 6,
+        Finalizado: 7,
+      };
+
+      const priorityA = statusPriority[a.status] || 8;
+      const priorityB = statusPriority[b.status] || 8;
+
+      // Si tienen diferentes prioridades, ordenar por prioridad
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
+
+      // Si tienen la misma prioridad, ordenar por fecha (más recientes primero)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
     console.log(
       `📋 Órdenes recuperadas: ${envios.length} de ${total} total (página ${page})`,
     );
 
-    return [envios, total];
+    return [enviosOrdenados, total];
   }
 
   async findOne(id: number): Promise<EnvioEntity> {
