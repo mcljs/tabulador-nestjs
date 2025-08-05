@@ -441,16 +441,17 @@ export class TabuladorService {
   async findAll(queryParams: any): Promise<[EnvioEntity[], number]> {
     const {
       page = 1,
-      limit = 20,
+      limit = 50, // Aumentar límite por defecto
       trackingNumber,
       status,
       tipoEnvio,
     } = queryParams;
+
     const queryBuilder = this.envioRepository.createQueryBuilder('envio');
 
     if (trackingNumber) {
-      queryBuilder.andWhere('envio.trackingNumber = :trackingNumber', {
-        trackingNumber,
+      queryBuilder.andWhere('envio.trackingNumber ILIKE :trackingNumber', {
+        trackingNumber: `%${trackingNumber}%`, // Buscar que contenga el texto
       });
     }
 
@@ -462,12 +463,38 @@ export class TabuladorService {
       queryBuilder.andWhere('envio.tipoEnvio = :tipoEnvio', { tipoEnvio });
     }
 
+    // Incluir información del usuario
     queryBuilder.leftJoinAndSelect('envio.user', 'user');
 
+    // ORDENAR POR FECHA DE CREACIÓN (MÁS RECIENTES PRIMERO)
+    // Y PRIORIZAR ÓRDENES PENDIENTES DE VERIFICACIÓN
+    queryBuilder
+      .orderBy(
+        `
+    CASE 
+      WHEN envio.status = 'Pendiente de Verificación' THEN 1
+      WHEN envio.status = 'Por Confirmar' THEN 2
+      WHEN envio.status = 'Confirmado' THEN 3
+      WHEN envio.status = 'En Proceso' THEN 4
+      WHEN envio.status = 'En Tránsito' THEN 5
+      WHEN envio.status = 'Entregado' THEN 6
+      WHEN envio.status = 'Finalizado' THEN 7
+      ELSE 8
+    END
+  `,
+        'ASC',
+      )
+      .addOrderBy('envio.createdAt', 'DESC'); // Más recientes primero
+
+    // Paginación
     const skip = (page - 1) * limit;
     queryBuilder.skip(skip).take(limit);
 
     const [envios, total] = await queryBuilder.getManyAndCount();
+
+    console.log(
+      `📋 Órdenes recuperadas: ${envios.length} de ${total} total (página ${page})`,
+    );
 
     return [envios, total];
   }
