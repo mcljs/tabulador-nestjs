@@ -39,12 +39,24 @@ export class TabuladorController {
   }
 
   @Post('crearOrdenEnvio')
-  crearOrdenEnvio(
-    @Body() createEnvioDto: CreateEnvioDto,
+  async crearOrdenEnvio(
+    @Body() body: any, // Cambié de CreateEnvioDto a any para ser flexible
     @Req() request: Request,
   ) {
     const { idUser } = request;
-    return this.tabuladorService.crearOrdenEnvio(createEnvioDto, idUser);
+
+    // Extraer información de pago si existe
+    const infoPago = body.infoPago || null;
+
+    // El resto de los datos del envío
+    const createEnvioDto = { ...body };
+    delete createEnvioDto.infoPago; // Quitar infoPago del dto principal
+
+    return this.tabuladorService.crearOrdenEnvio(
+      createEnvioDto,
+      idUser,
+      infoPago, // Pasar la info de pago como parámetro adicional
+    );
   }
 
   @Roles('ADMIN')

@@ -557,6 +557,7 @@ export class TabuladorService {
   async crearOrdenEnvio(
     createEnvioDto: CreateEnvioDto,
     id: string,
+    infoPago?: any, // Parámetro opcional para info de pago
   ): Promise<EnvioEntity> {
     const user = await this.usersService.findUserByID(id);
 
@@ -564,7 +565,6 @@ export class TabuladorService {
       throw new NotFoundException(`User with ID "${id}" not found`);
     }
 
-    // Primero verificamos si es un sobre (peso <= 1kg)
     if (createEnvioDto.peso && createEnvioDto.peso <= 1) {
       createEnvioDto.esSobre = true;
     }
@@ -572,24 +572,116 @@ export class TabuladorService {
     const envio = await this.calcularEnvio(createEnvioDto as any);
 
     envio.trackingNumber = 'ENV' + Date.now();
-    envio.status = 'Por Confirmar';
+
+    // Si hay información de pago, añadirla y cambiar estado
+    if (infoPago) {
+      envio.status = 'Pendiente de Verificación';
+      envio.numeroTransferencia = infoPago.numeroTransferencia;
+      envio.fechaPago = infoPago.fechaPago;
+      envio.horaPago = infoPago.horaPago;
+      envio.bancoEmisor = infoPago.bancoEmisor;
+
+      // Si hay imagen en base64, guardarla
+      if (infoPago.comprobanteBase64) {
+        try {
+          envio.comprobantePago = await this.saveBase64Image(
+            infoPago.comprobanteBase64,
+          );
+        } catch (error) {
+          console.warn(
+            '⚠️ Error al guardar comprobante, continuando sin imagen:',
+            error.message,
+          );
+        }
+      }
+    } else {
+      envio.status = 'Por Confirmar';
+    }
+
     envio.user = user;
     const envioGuardado = await this.envioRepository.save(envio);
-{/*
-     try {
-      await this.notificationService.notificarNuevoEnvio({
-        user,
-        envio: envioGuardado,
-      });
-      console.log(`📧 Notificación de nuevo envío enviada a ${user.email}`);
-    } catch (error) {
-      console.error('❌ Error al enviar notificación de nuevo envío:', error);
-    }
-  
-  */}
- 
+
+    this.enviarNotificacionBasica(user, envioGuardado, infoPago);
 
     return envioGuardado;
+  }
+
+  // Método simplificado que usa solo tu método existente
+  private enviarNotificacionBasica(
+    user: any,
+    envio: any,
+    infoPago?: any,
+  ): void {
+    setImmediate(async () => {
+      try {
+        // Usar solo el método que ya tienes
+        await this.notificationService.notificarNuevoEnvio({
+          user,
+          envio,
+        });
+
+        if (infoPago) {
+          console.log(
+            `✅ Notificación enviada - Orden con pago: ${envio.trackingNumber}`,
+          );
+        } else {
+          console.log(
+            `✅ Notificación enviada - Orden sin pago: ${envio.trackingNumber}`,
+          );
+        }
+      } catch (error) {
+        console.warn('⚠️ No se pudo enviar notificación:', {
+          error: error.message,
+          userEmail: user.email,
+          trackingNumber: envio.trackingNumber,
+        });
+      }
+    });
+  }
+
+  // Método auxiliar para guardar imagen base64
+  private async saveBase64Image(base64String: string): Promise<string> {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const fs = require('fs');
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const path = require('path');
+
+      if (!base64String || !base64String.includes('data:image')) {
+        throw new Error('Formato de imagen inválido');
+      }
+
+      const uploadDir = './uploads/comprobantes';
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      const matches = base64String.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+      if (!matches || matches.length !== 3) {
+        throw new Error('Formato base64 inválido');
+      }
+
+      const mimeType = matches[1];
+      const base64Data = matches[2];
+      const extension = mimeType.split('/')[1] || 'jpg';
+
+      if (!mimeType.startsWith('image/')) {
+        throw new Error('El archivo debe ser una imagen');
+      }
+
+      const filename = `comprobante-${Date.now()}-${Math.random()
+        .toString(36)
+        .substr(2, 9)}.${extension}`;
+      const filePath = path.join(uploadDir, filename);
+
+      fs.writeFileSync(filePath, base64Data, 'base64');
+
+      console.log(`📁 Comprobante guardado: ${filename}`);
+      return filePath;
+    } catch (error) {
+      console.error('❌ Error al guardar imagen:', error.message);
+      throw new Error(`No se pudo guardar el comprobante: ${error.message}`);
+    }
   }
 
   async actualizarEstadoOrden(

@@ -3,14 +3,27 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import * as morgan from 'morgan';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
+import * as express from 'express';
 
 import { AppModule } from './app.module';
 import { CORS } from './config';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Cambiar a NestExpressApplication para poder servir archivos estáticos
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.use(morgan('dev'));
+
+  // AÑADIR: Aumentar límites para imágenes base64
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
+  // AÑADIR: Servir archivos estáticos para comprobantes de pago
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads/',
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -34,12 +47,14 @@ async function bootstrap() {
     .setTitle('AgileFlow API')
     .setDescription('The API Manage Projects: Flowing Agilely Through Tasks.')
     .setVersion('1.0')
-    // .addTag('Tasks, Projects, Kanban')
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('AgileFlow/docs', app, document);
 
   await app.listen(configService.get('PORT'));
   console.log(`Server Application Up: ${await app.getUrl()}`);
+  console.log(
+    `📁 Archivos estáticos servidos desde: ${await app.getUrl()}/uploads/`,
+  );
 }
 bootstrap();

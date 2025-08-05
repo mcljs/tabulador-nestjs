@@ -101,6 +101,22 @@ export class EnvioEntity {
   @Column({ type: 'float', default: 0 })
   totalPeaje!: number;
 
+  // CAMPOS DE INFORMACIÓN DE PAGO
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  numeroTransferencia?: string;
+
+  @Column({ type: 'date', nullable: true })
+  fechaPago?: string;
+
+  @Column({ type: 'time', nullable: true })
+  horaPago?: string;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  bancoEmisor?: string;
+
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  comprobantePago?: string; // Ruta del archivo de comprobante
+
   @CreateDateColumn({
     type: 'timestamp',
     name: 'created_at',
