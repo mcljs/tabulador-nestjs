@@ -575,8 +575,8 @@ export class TabuladorService {
     envio.status = 'Por Confirmar';
     envio.user = user;
     const envioGuardado = await this.envioRepository.save(envio);
-
-    try {
+{/*
+     try {
       await this.notificationService.notificarNuevoEnvio({
         user,
         envio: envioGuardado,
@@ -585,6 +585,9 @@ export class TabuladorService {
     } catch (error) {
       console.error('❌ Error al enviar notificación de nuevo envío:', error);
     }
+  
+  */}
+ 
 
     return envioGuardado;
   }
