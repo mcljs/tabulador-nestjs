@@ -20,10 +20,22 @@ async function bootstrap() {
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-  // AÑADIR: Servir archivos estáticos para comprobantes de pago
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+  // CORREGIR: Usar ruta absoluta para uploads
+  const uploadsPath = '/root/tabulador-nestjs/uploads';
+  console.log(`🔍 Intentando servir archivos desde: ${uploadsPath}`);
+
+  app.useStaticAssets(uploadsPath, {
     prefix: '/uploads/',
   });
+
+  // Verificar que el directorio existe
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const fs = require('fs');
+  if (fs.existsSync(uploadsPath)) {
+    console.log(`✅ Directorio de uploads encontrado: ${uploadsPath}`);
+  } else {
+    console.error(`❌ Directorio de uploads NO encontrado: ${uploadsPath}`);
+  }
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -56,5 +68,17 @@ async function bootstrap() {
   console.log(
     `📁 Archivos estáticos servidos desde: ${await app.getUrl()}/uploads/`,
   );
+
+  // Test de archivo específico
+  const testFile = join(
+    uploadsPath,
+    'comprobantes',
+    'comprobante-1754425679739-uqub9gd0f.jpeg',
+  );
+  if (fs.existsSync(testFile)) {
+    console.log(`✅ Archivo de prueba encontrado: ${testFile}`);
+  } else {
+    console.error(`❌ Archivo de prueba NO encontrado: ${testFile}`);
+  }
 }
 bootstrap();
